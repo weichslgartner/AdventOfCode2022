@@ -17,7 +17,7 @@ extension = {Language.Python: "py", Language.Haskell: "hs", Language.Rust: "rs",
 
 cookie = open(".cookie", 'r').readline().strip()
 cookies = {'session': cookie}
-year = 2021
+year = 2022
 
 
 def python_stub(day: int) -> str:
@@ -131,7 +131,7 @@ def generate_source_path(day: int, lang: Language) -> Path:
 def main():
     today = date.today()
     print("Today is:", today)
-    for day in range(1, 2):
+    for day in range(1, 26):
         if today.year == year and (today.day < day or today.month != 12):
             break
         get_input(day)
