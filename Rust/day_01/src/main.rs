@@ -1,13 +1,7 @@
-fn parse_element(vals: &str) -> i32 {
-    vals.split('\n').map(|e| e.parse::<i32>().unwrap()).sum()
-}
-
 fn parse(input: &str) -> Vec<i32> {
     input
         .split("\n\n")
-        .collect::<Vec<&str>>()
-        .into_iter()
-        .map(|y| parse_element(y))
+        .map(|y| y.split('\n').map(|e| e.parse::<i32>().unwrap()).sum())
         .collect::<Vec<i32>>()
 }
 
