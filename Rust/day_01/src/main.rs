@@ -1,4 +1,4 @@
-fn parse(input: &str) -> Vec<i32> {
+fn calories_per_elf(input: &str) -> Vec<i32> {
     input
         .trim()
         .split("\n\n")
@@ -18,7 +18,7 @@ fn part2(input: &mut Vec<i32>) -> i32 {
 
 fn main() {
     let input = include_str!("../../../inputs/input_01.txt");
-    let mut parsed_input = parse(input);
-    println!("Part 1: {}", part1(&parsed_input));
-    println!("Part 2: {}", part2(&mut parsed_input));
+    let mut calories = calories_per_elf(input);
+    println!("Part 1: {}", part1(&calories));
+    println!("Part 2: {}", part2(&mut calories));
 }
