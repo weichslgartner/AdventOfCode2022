@@ -4,10 +4,6 @@ from typing import List
 from aoc import input_as_str
 
 
-def parse_input(lines):
-    return lines
-
-
 def part_1(heap: List) -> int:
     return -heap[0]
 
