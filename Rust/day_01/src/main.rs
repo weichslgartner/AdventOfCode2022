@@ -1,19 +1,18 @@
-fn calories_per_elf(input: &str) -> Vec<i32> {
+use std::collections::BinaryHeap;
+fn calories_per_elf(input: &str) -> BinaryHeap<i32> {
     input
         .trim()
         .split("\n\n")
         .map(|y| y.split('\n').map(|e| e.parse::<i32>().unwrap()).sum())
-        .collect::<Vec<i32>>()
+        .collect::<BinaryHeap<i32>>()
 }
 
-fn part1(input: &Vec<i32>) -> i32 {
-    *input.iter().max().unwrap()
+fn part1(input: &BinaryHeap<i32>) -> &i32 {
+    input.peek().unwrap()
 }
 
-fn part2(input: &mut Vec<i32>) -> i32 {
-    // if partial sort existed, would be better here
-    input.sort_unstable_by(|a, b| b.cmp(a));
-    input[0..3].iter().sum()
+fn part2(input: &mut BinaryHeap<i32>) -> i32 {
+    (0..3).map(|_| input.pop().unwrap()).sum()
 }
 
 fn main() {
