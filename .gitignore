@@ -12,5 +12,9 @@ Cargo.lock
 # Access cookie for AoC auth
 .cookie
 
+# caches
+**/__pycache__/
+
 # IDEs
 .idea
+.vscode

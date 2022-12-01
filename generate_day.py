@@ -71,7 +71,7 @@ def cargo_stub(day):
     return f"""[package]
 name = "day_{day:02d}"
 version = "0.1.0"
-edition = "{year}"
+edition = "2021"
 authors = ["weichslgartner <weichslgartner@gmail.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
