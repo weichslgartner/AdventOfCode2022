@@ -7,8 +7,8 @@ fn calories_per_elf(input: &str) -> BinaryHeap<i32> {
         .collect::<BinaryHeap<i32>>()
 }
 
-fn part1(input: &BinaryHeap<i32>) -> &i32 {
-    input.peek().unwrap()
+fn part1(input: &BinaryHeap<i32>) -> i32 {
+    *input.peek().unwrap()
 }
 
 fn part2(input: &mut BinaryHeap<i32>) -> i32 {
