@@ -19,8 +19,7 @@ def part_2(heap: List) -> int:
 def to_heap(lines):
     sums = []
     heapq.heapify(sums)
-    for i in lines.split("\n\n"):
-        heapq.heappush(sums, -sum([int(x) for x in i.split("\n")]))
+    [heapq.heappush(sums, -sum([int(x) for x in i.split("\n")])) for i in lines.split("\n\n")]
     return sums
 
 
