@@ -1,3 +1,5 @@
+import heapq
+
 from aoc import get_lines
 from pathlib import Path
 
@@ -20,16 +22,15 @@ def part_1(lines):
 
 def part_2(lines):
     sums = []
+    heapq.heapify(sums)
     cur_sum = 0
     for i in lines:
         if i == "":
-            sums.append(cur_sum)
+            heapq.heappush(sums,-cur_sum)
             cur_sum = 0
         else:
             cur_sum += int(i)
-    sums.append(cur_sum)
-    sums.sort(reverse=True)
-    return sum(sums[0:3])
+    return -sum([heapq.heappop(sums) for _ in range(3)])
 
 
 def main():
