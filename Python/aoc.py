@@ -47,10 +47,11 @@ def get_lines(file_name: str) -> List[str]:
         lines = f.read().splitlines()
     return lines
 
+
 def input_as_str(file_name: str) -> str:
     file = Path(__file__).parents[1] / "inputs" / file_name
     with file.open('r') as f:
-        return f.read().strip()
+        return f.read().strip().strip()
     return ""
 
 

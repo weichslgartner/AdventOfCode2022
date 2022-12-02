@@ -9,7 +9,7 @@ def part_1(heap: List) -> int:
 
 
 def part_2(heap: List) -> int:
-    return -sum([heapq.heappop(heap) for _ in range(3)])
+    return -sum(heapq.nsmallest(3, heap))
 
 
 def to_heap(lines):
