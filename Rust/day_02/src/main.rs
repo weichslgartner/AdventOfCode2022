@@ -7,7 +7,7 @@ fn base_points(to_check: char) -> i32 {
         'X' => return 1,
         'Y' => return 2,
         'Z' => return 3,
-        _ => return 0,
+        _ => unreachable!(),
     }
 }
 
@@ -34,7 +34,7 @@ fn convert(line: &str) -> &str {
                 .next()
                 .unwrap()
         }
-        _ => return "",
+        _ => unreachable!(),
     }
 }
 
@@ -48,20 +48,29 @@ fn win_points(to_check: &str) -> i32 {
     0
 }
 
-fn part1(input: &str) -> i32 {
-    input.split('\n').into_iter().fold(0, |a: i32, x: &str| {
-        a + base_points(x.chars().nth(2).unwrap()) + win_points(x)
-    })
+fn calc_points(line: &str) -> i32 {
+    base_points(line.chars().nth(2).unwrap()) + win_points(line)
 }
 
-fn part2(input: &str) -> i32 {
+fn solve(input: &str, part2: bool) -> i32 {
     input
         .split('\n')
         .into_iter()
-        .map(convert)
-        .fold(0, |a: i32, x: &str| {
-            a + base_points(x.chars().nth(2).unwrap()) + win_points(x)
+        .map(|x| {
+            if part2 {
+                return convert(x);
+            }
+            return x;
         })
+        .fold(0, |a: i32, x: &str| a + calc_points(&x))
+}
+
+fn part1(input: &str) -> i32 {
+    solve(&input, false)
+}
+
+fn part2(input: &str) -> i32 {
+    solve(&input, true)
 }
 
 fn main() {

@@ -12,12 +12,12 @@ draw = ["A X", "B Y", "C Z"]
 lose = ["A Z", "B X", "C Y"]
 
 
-def convert(line):
+def convert(line: str) -> str:
     if second[line[-1]] == 0:
-        return list(filter(lambda x: x[0] == line[0], lose))[0]
+        return next(filter(lambda x: x[0] == line[0], lose))
     if second[line[-1]] == 3:
-        return list(filter(lambda x: x[0] == line[0], draw))[0]
-    return list(filter(lambda x: x[0] == line[0], win))[0]
+        return next(filter(lambda x: x[0] == line[0], draw))
+    return next(filter(lambda x: x[0] == line[0], win))
 
 
 def part_1(lines: List[str]) -> int:
