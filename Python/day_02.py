@@ -1,3 +1,6 @@
+from functools import reduce
+from typing import List
+
 from aoc import get_lines
 
 points = {'X': 1, 'Y': 2, 'Z': 3}
@@ -9,29 +12,20 @@ draw = ["A X", "B Y", "C Z"]
 lose = ["A Z", "B X", "C Y"]
 
 
-def part_1(lines):
-    score = 0
-    for line in lines:
-        score += points[line[-1]]
-        if line in win:
-            score += 6
-        elif line in draw:
-            score += 3
-    return score
+def convert(line):
+    if second[line[-1]] == 0:
+        return list(filter(lambda x: x[0] == line[0], lose))[0]
+    if second[line[-1]] == 3:
+        return list(filter(lambda x: x[0] == line[0], draw))[0]
+    return list(filter(lambda x: x[0] == line[0], win))[0]
 
 
-def part_2(lines):
-    score = 0
-    for line in lines:
-        score += second[line[-1]]
-        if second[line[-1]] == 0:
-            cur = list(filter(lambda x: x[0] == line[0], lose))[0]
-        elif second[line[-1]] == 3:
-            cur = list(filter(lambda x: x[0] == line[0], draw))[0]
-        else:
-            cur = list(filter(lambda x: x[0] == line[0], win))[0]
-        score += points[cur[-1]]
-    return score
+def part_1(lines: List[str]) -> int:
+    return reduce(lambda accu, line: accu + points[line[-1]] + (line in win) * 6 + (line in draw) * 3, lines, 0)
+
+
+def part_2(lines: List[str]) -> int:
+    return reduce(lambda accu, line: accu + second[line[-1]] + points[convert(line)[-1]], lines, 0)
 
 
 def main():

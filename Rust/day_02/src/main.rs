@@ -48,7 +48,6 @@ fn win_points(to_check: &str) -> i32 {
     0
 }
 
-
 fn part1(input: &str) -> i32 {
     input.split('\n').into_iter().fold(0, |a: i32, x: &str| {
         a + base_points(x.chars().nth(2).unwrap()) + win_points(x)
@@ -59,7 +58,7 @@ fn part2(input: &str) -> i32 {
     input
         .split('\n')
         .into_iter()
-        .map(|x| convert(&x))
+        .map(convert)
         .fold(0, |a: i32, x: &str| {
             a + base_points(x.chars().nth(2).unwrap()) + win_points(x)
         })
