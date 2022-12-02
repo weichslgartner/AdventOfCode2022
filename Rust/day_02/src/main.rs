@@ -16,22 +16,19 @@ fn convert(line: &str) -> &str {
         'X' => {
             return LOSE
                 .iter()
-                .filter(|x| line.chars().nth(0).unwrap() == x.chars().nth(0).unwrap())
-                .next()
+                .find(|x| line.chars().nth(0).unwrap() == x.chars().nth(0).unwrap())
                 .unwrap()
         }
         'Y' => {
             return DRAW
                 .iter()
-                .filter(|x| line.chars().nth(0).unwrap() == x.chars().nth(0).unwrap())
-                .next()
+                .find(|x| line.chars().nth(0).unwrap() == x.chars().nth(0).unwrap())
                 .unwrap()
         }
         'Z' => {
             return WIN
                 .iter()
-                .filter(|x| line.chars().nth(0).unwrap() == x.chars().nth(0).unwrap())
-                .next()
+                .find(|x| line.chars().nth(0).unwrap() == x.chars().nth(0).unwrap())
                 .unwrap()
         }
         _ => unreachable!(),
