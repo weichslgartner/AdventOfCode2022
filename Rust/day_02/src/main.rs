@@ -4,33 +4,24 @@ const LOSE: [&str; 3] = ["A Z", "B X", "C Y"];
 
 fn base_points(to_check: char) -> i32 {
     match to_check {
-        'X' => return 1,
-        'Y' => return 2,
-        'Z' => return 3,
+        'X' => 1,
+        'Y' => 2,
+        'Z' => 3,
         _ => unreachable!(),
     }
 }
 
-fn convert(line: &str) -> &str {
+fn convert(line: &str) -> Option<&&str> {
     match line.chars().nth(2).unwrap() {
-        'X' => {
-            return LOSE
-                .iter()
-                .find(|x| line.chars().nth(0).unwrap() == x.chars().nth(0).unwrap())
-                .unwrap()
-        }
-        'Y' => {
-            return DRAW
-                .iter()
-                .find(|x| line.chars().nth(0).unwrap() == x.chars().nth(0).unwrap())
-                .unwrap()
-        }
-        'Z' => {
-            return WIN
-                .iter()
-                .find(|x| line.chars().nth(0).unwrap() == x.chars().nth(0).unwrap())
-                .unwrap()
-        }
+        'X' => LOSE
+            .iter()
+            .find(|x| line.chars().next().unwrap() == x.chars().next().unwrap()),
+        'Y' => DRAW
+            .iter()
+            .find(|x| line.chars().next().unwrap() == x.chars().next().unwrap()),
+        'Z' => WIN
+            .iter()
+            .find(|x| line.chars().next().unwrap() == x.chars().next().unwrap()),
         _ => unreachable!(),
     }
 }
@@ -53,25 +44,25 @@ fn solve(input: &str, part2: bool) -> i32 {
     input
         .split('\n')
         .into_iter()
-        .map(|x| {
+        .map(|x: &str| -> &str {
             if part2 {
-                return convert(x);
+                return convert(x).unwrap();
             }
-            return x;
+            x
         })
-        .fold(0, |a: i32, x: &str| a + calc_points(&x))
+        .fold(0, |a: i32, x| a + calc_points(x))
 }
 
 fn part1(input: &str) -> i32 {
-    solve(&input, false)
+    solve(input, false)
 }
 
 fn part2(input: &str) -> i32 {
-    solve(&input, true)
+    solve(input, true)
 }
 
 fn main() {
     let input = include_str!("../../../inputs/input_02.txt").trim();
-    println!("Part 1: {}", part1(&input));
-    println!("Part 2: {}", part2(&input));
+    println!("Part 1: {}", part1(input));
+    println!("Part 2: {}", part2(input));
 }
