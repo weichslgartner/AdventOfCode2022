@@ -12,7 +12,7 @@ fn base_points(to_check: char) -> i32 {
 }
 
 fn convert(line: &str) -> Option<&&str> {
-    match line.chars().nth(2).unwrap() {
+    match line.chars().nth(2)? {
         'X' => LOSE
             .iter()
             .find(|x| line.chars().next().unwrap() == x.chars().next().unwrap()),
