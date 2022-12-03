@@ -24,17 +24,12 @@ fn split_line_in_half(line: &str) -> (&str, &str) {
     (&line[..size], &line[size..])
 }
 
-fn find_common_char(part_a: &str, part_b: &str) -> Option<char> {
-    let seta = part_a.chars().collect::<HashSet<char>>();
-    let setb = part_b.chars().collect::<HashSet<char>>();
-    seta.intersection(&setb).next().copied()
-}
 
 fn part1(input: &str) -> Option<u32> {
     input
         .lines()
         .map(split_line_in_half)
-        .map(|x| find_common_char(x.0, x.1))
+        .map(|x| find_common_char([x.0, x.1].iter()))
         .map(calc_prio)
         .sum()
 }
@@ -44,7 +39,7 @@ fn part2(input: &str) -> Option<u32> {
         .lines()
         .chunks(3)
         .into_iter()
-        .map(find_common_char2)
+        .map(find_common_char)
         .map(calc_prio)
         .sum()
 }
@@ -53,10 +48,13 @@ fn part2(input: &str) -> Option<u32> {
 // IntoIterator
 
 //
-fn find_common_char2<'a, I: Iterator<Item=&'a str>>(mut chunk: I) -> Option<char> {
-    let mut seta = chunk.next()?.chars().collect::<HashSet<char>>();
+fn find_common_char<I>(mut chunk: I) -> Option<char>
+where
+    I: Iterator,
+    I::Item: AsRef<str> {
+    let mut seta = chunk.next()?.as_ref().chars().collect::<HashSet<char>>();
     for c in chunk {
-        let setb = c.chars().collect::<HashSet<char>>();
+        let setb = c.as_ref().chars().collect::<HashSet<char>>();
         seta.retain(|e| setb.contains(e))
     }
     seta.iter().next().copied()
