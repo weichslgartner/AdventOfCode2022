@@ -12,8 +12,8 @@ fn calc_prio(common: Option<char>) -> Option<u32> {
             let upper_offset: u32 = 'A'.into();
             return Some(c - upper_offset + 27);
         }
-        return None
-    } 
+        return None;
+    }
     None
 }
 
@@ -27,12 +27,15 @@ where
     I::Item: AsRef<str>,
 {
     let init = chunk.next()?.as_ref().chars().collect::<HashSet<char>>();
-    let sum = chunk.fold(init, |mut accu, x| {
-        let setb = x.as_ref().chars().collect::<HashSet<char>>();
-        accu.retain(|e| setb.contains(e));
-        accu
-    });
-    sum.iter().next().copied()
+    chunk
+        .fold(init, |mut accu, x| {
+            let setb = x.as_ref().chars().collect::<HashSet<char>>();
+            accu.retain(|e| setb.contains(e));
+            accu
+        })
+        .iter()
+        .next()
+        .copied()
 }
 
 fn part1(input: &str) -> Option<u32> {
