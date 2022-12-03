@@ -2,20 +2,19 @@ use itertools::Itertools;
 use std::collections::HashSet;
 
 fn calc_prio(common: Option<char>) -> Option<u32> {
-    match common {
-        Some(common) => {
-            let c: u32 = common.into();
-            if common.is_lowercase() {
-                let lower_offset: u32 = 'a'.into();
-                return Some(c - lower_offset + 1);
-            }
-            if common.is_uppercase() {
-                let upper_offset: u32 = 'A'.into();
-                return Some(c - upper_offset + 27);
-            }
-            None
+    if let Some(common) = common {
+        let c: u32 = common.into();
+        if common.is_lowercase() {
+            let lower_offset: u32 = 'a'.into();
+            return Some(c - lower_offset + 1);
         }
-        None => None,
+        if common.is_uppercase() {
+            let upper_offset: u32 = 'A'.into();
+            return Some(c - upper_offset + 27);
+        }
+        None
+    } else {
+        None
     }
 }
 

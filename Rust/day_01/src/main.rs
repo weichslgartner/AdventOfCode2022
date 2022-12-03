@@ -3,7 +3,7 @@ fn calories_per_elf(input: &str) -> BinaryHeap<i32> {
     input
         .trim()
         .split("\n\n")
-        .map(|y| y.split('\n').map(|e| e.parse::<i32>().unwrap()).sum())
+        .map(|y| y.lines().map(|e| e.parse::<i32>().unwrap()).sum())
         .collect::<BinaryHeap<i32>>()
 }
 
