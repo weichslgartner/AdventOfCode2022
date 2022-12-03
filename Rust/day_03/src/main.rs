@@ -2,13 +2,13 @@ use std::collections::HashSet;
 
 
 fn calc_prio(common: char) -> u32 {
-    let  LOWER_OFFSET: u32 = 'a'.into();
-    let UPPER_OFFSET: u32 = 'A'.into();
+    let lower_offset: u32 = 'a'.into();
+    let upper_offset: u32 = 'A'.into();
     let c: u32 = common.into();
     if common.is_lowercase() {
-        return c - LOWER_OFFSET + 1;
+        return c - lower_offset + 1;
     }
-    c - UPPER_OFFSET + 27
+    c - upper_offset + 27
 }
 
 fn split_line_in_half(line: &str) -> (&str, &str) {
@@ -24,17 +24,20 @@ fn part1(input: &str) -> u32 {
     let mut sum = 0;
     for line in input.split('\n') {
         let (part_a, part_b) = split_line_in_half(line);
-        let seta = part_a.chars().collect::<HashSet<char>>();
-        let setb = part_b.chars().collect::<HashSet<char>>();
-        let mut diff = seta.intersection(&setb);
-        let common = diff.next().unwrap();
-        //println!("{}", common);
-        sum += calc_prio(*common);
+        let common = find_common_char(part_a, part_b);
+        sum += calc_prio(common.unwrap());
     }
     sum
 }
 
-fn part2(input: &str) -> u32 {
+fn find_common_char(part_a: &str, part_b: &str) -> Option<char> {
+    let seta = part_a.chars().collect::<HashSet<char>>();
+    let setb = part_b.chars().collect::<HashSet<char>>();
+    seta.intersection(&setb).next().copied()
+   
+}
+
+fn part2(_input: &str) -> u32 {
     0
 }
 
