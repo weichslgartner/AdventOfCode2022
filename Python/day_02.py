@@ -1,5 +1,4 @@
 from enum import Enum
-from functools import reduce
 from typing import List
 
 from aoc import get_lines
@@ -27,12 +26,12 @@ def convert(line: str) -> str:
 
 
 def part_1(lines: List[str]) -> int:
-    return reduce(lambda accu, line: accu + points[line[-1]] + (line in win) * Result.WIN.value + (
-                line in draw) * Result.DRAW.value, lines, 0)
+    return sum(map(lambda line: points[line[-1]] + (line in win) * Result.WIN.value + (
+            line in draw) * Result.DRAW.value, lines))
 
 
 def part_2(lines: List[str]) -> int:
-    return reduce(lambda accu, line: accu + second[line[-1]] + points[convert(line)[-1]], lines, 0)
+    return sum(map(lambda line: second[line[-1]] + points[convert(line)[-1]], lines))
 
 
 def main():

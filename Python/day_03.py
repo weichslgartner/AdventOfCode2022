@@ -1,5 +1,5 @@
-from functools import reduce
-from typing import List, Iterable
+from functools import reduce, partial
+from typing import List, Iterable, Callable, Any
 
 from aoc import get_lines
 
@@ -23,18 +23,22 @@ def find_common_char(words: Iterable[str]) -> str:
     return reduce(lambda accu, x: accu & set(x), words, set(next(words))).pop()
 
 
+def solve(lines: List[str], partition: Callable[[Any], Iterable[str]]) -> int:
+    return sum(map(lambda x: calc_prio(find_common_char(iter(x))), partition(lines)))
+
+
 def part_1(lines: List[str]) -> int:
-    return sum(map(lambda x: calc_prio(find_common_char(iter(x))), map(split_line_in_half, lines)))
+    return solve(lines, partial(map, split_line_in_half))
 
 
 def part_2(lines: List[str]) -> int:
-    return sum(calc_prio(find_common_char(iter(c))) for c in chunk(lines))
+    return solve(lines, chunk)
 
 
 def main():
     lines = get_lines("input_03.txt")
-    print("Part 1:", part_1(lines)) # Part 1: 8176
-    print("Part 2:", part_2(lines)) # Part 2: 2689
+    print("Part 1:", part_1(lines))  # Part 1: 8176
+    print("Part 2:", part_2(lines))  # Part 2: 2689
 
 
 if __name__ == '__main__':
