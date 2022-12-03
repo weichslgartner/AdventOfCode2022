@@ -1,14 +1,7 @@
 from functools import reduce
-from typing import List
+from typing import List, Iterable
 
 from aoc import get_lines
-
-test = """vJrwpWtwJgWrhcsFMMfFFhFp
-jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
-PmmdzqPrVvPwwTWBwg
-wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
-ttgJtRGJQctTZtZT
-CrZsJsPPZsGzwwsLwLmpwMDw"""
 
 
 def chunk(lines: List[str], size=3) -> List[str]:
@@ -26,21 +19,22 @@ def split_line_in_half(line: str) -> (str, str):
     return line[:len(line) // 2], line[len(line) // 2:]
 
 
+def find_common_char(words: Iterable[str]) -> str:
+    return reduce(lambda accu, x: accu & set(x), words, set(next(words))).pop()
+
+
 def part_1(lines: List[str]) -> int:
-    return sum(map(lambda x: calc_prio((set(x[0]) & set(x[1])).pop()), map(split_line_in_half, lines)))
+    return sum(map(lambda x: calc_prio(find_common_char(iter(x))), map(split_line_in_half, lines)))
 
 
 def part_2(lines: List[str]) -> int:
-    return sum(calc_prio(reduce(lambda accu, x: accu & set(x) if len(accu) > 0 else set(x), c, set()).pop()) for c in
-               chunk(lines))
+    return sum(calc_prio(find_common_char(iter(c))) for c in chunk(lines))
 
 
 def main():
     lines = get_lines("input_03.txt")
-    assert (part_1(test.splitlines()) == 157)
-    assert (part_2(test.splitlines()) == 70)
-    print("Part 1:", part_1(lines))
-    print("Part 2:", part_2(lines))
+    print("Part 1:", part_1(lines)) # Part 1: 8176
+    print("Part 2:", part_2(lines)) # Part 2: 2689
 
 
 if __name__ == '__main__':

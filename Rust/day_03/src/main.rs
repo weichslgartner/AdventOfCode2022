@@ -4,13 +4,13 @@ use std::collections::HashSet;
 fn calc_prio(common: Option<char>) -> Option<u32> {
     match common {
         Some(common) => {
-            let lower_offset: u32 = 'a'.into();
-            let upper_offset: u32 = 'A'.into();
             let c: u32 = common.into();
             if common.is_lowercase() {
+                let lower_offset: u32 = 'a'.into();
                 return Some(c - lower_offset + 1);
             }
             if common.is_uppercase() {
+                let upper_offset: u32 = 'A'.into();
                 return Some(c - upper_offset + 27);
             }
             None
@@ -20,10 +20,22 @@ fn calc_prio(common: Option<char>) -> Option<u32> {
 }
 
 fn split_line_in_half(line: &str) -> (&str, &str) {
-    let size = line.len() / 2;
-    (&line[..size], &line[size..])
+    (&line[..(line.len() / 2)], &line[(line.len() / 2)..])
 }
 
+fn find_common_char<I>(mut chunk: I) -> Option<char>
+where
+    I: Iterator,
+    I::Item: AsRef<str>,
+{
+    let init = chunk.next()?.as_ref().chars().collect::<HashSet<char>>();
+    let sum = chunk.fold(init, |mut accu, x| {
+        let setb = x.as_ref().chars().collect::<HashSet<char>>();
+        accu.retain(|e| setb.contains(e));
+        accu
+    });
+    sum.iter().next().copied()
+}
 
 fn part1(input: &str) -> Option<u32> {
     input
@@ -42,22 +54,6 @@ fn part2(input: &str) -> Option<u32> {
         .map(find_common_char)
         .map(calc_prio)
         .sum()
-}
-
-// itertools::Chunk<std::str::Lines>
-// IntoIterator
-
-//
-fn find_common_char<I>(mut chunk: I) -> Option<char>
-where
-    I: Iterator,
-    I::Item: AsRef<str> {
-    let mut seta = chunk.next()?.as_ref().chars().collect::<HashSet<char>>();
-    for c in chunk {
-        let setb = c.as_ref().chars().collect::<HashSet<char>>();
-        seta.retain(|e| setb.contains(e))
-    }
-    seta.iter().next().copied()
 }
 
 fn main() {
