@@ -1,6 +1,7 @@
-from aoc import get_lines
-from pathlib import Path
+from functools import reduce
+from typing import List
 
+from aoc import get_lines
 
 test = """vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
@@ -9,47 +10,39 @@ wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
 ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw"""
 
+
+def chunk(lines: List[str], size=3):
+    for i in range(0, len(lines), size):
+        yield lines[i:i + size]
+
+
 def parse_input(lines):
     return lines
 
-def part_1(lines):
-    res = []
-    for line in lines:
-        part1 = line[:len(line)//2]
-        part2 =  line[len(line)//2:]
-        assert(len(part1)==len(part2))
-        common = (set(part1) & set(part2)).pop()
-        if common.islower():
-            res.append(ord(common)- ord('a') + 1)
-        else:
-            res.append(ord(common)- ord('A') + 27)
 
-    return sum(res)
+def calc_prio(common: str) -> int:
+    if common.islower():
+        return ord(common) - ord('a') + 1
+    return ord(common) - ord('A') + 27
+
+
+def split_line_in_half(line: str) -> (str, str):
+    return line[:len(line) // 2], line[len(line) // 2:]
+
+
+def part_1(lines: List[str]) -> int:
+    return sum(map(lambda x: calc_prio((set(x[0]) & set(x[1])).pop()), map(split_line_in_half, lines)))
 
 
 def part_2(lines):
-    res = []
-    i =1
-    cur_set = set()
-    for line in lines:
-        if len(cur_set)==0:
-            cur_set = set(line)
-        else:
-            cur_set &= set(line)
-        print(i, cur_set)
-        if i == 3:
-            common = cur_set.pop()
-            if common.islower():
-                res.append(ord(common) - ord('a') + 1)
-            else:
-                res.append(ord(common) - ord('A') + 27)
-            i=0
-        i += 1
-    return sum(res)
+    return sum(calc_prio(reduce(lambda accu, x: accu & set(x) if len(accu) > 0 else set(x), c, set()).pop()) for c in
+               chunk(lines))
+
 
 def main():
     lines = get_lines("input_03.txt")
-   # lines = test.splitlines()
+    assert (part_1(test.splitlines()) == 157)
+    assert (part_2(test.splitlines()) == 70)
     lines = parse_input(lines)
     print("Part 1:", part_1(lines))
     print("Part 2:", part_2(lines))
