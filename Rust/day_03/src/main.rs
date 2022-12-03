@@ -12,10 +12,9 @@ fn calc_prio(common: Option<char>) -> Option<u32> {
             let upper_offset: u32 = 'A'.into();
             return Some(c - upper_offset + 27);
         }
-        None
-    } else {
-        None
-    }
+        return None
+    } 
+    None
 }
 
 fn split_line_in_half(line: &str) -> (&str, &str) {
