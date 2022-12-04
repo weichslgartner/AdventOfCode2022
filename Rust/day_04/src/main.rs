@@ -30,20 +30,19 @@ fn partial_overlap(p1: &[i32], p2: &[i32]) -> bool {
     false
 }
 
-fn solve(input: &[Vec<Vec<i32>>], overlap: OverlapFun) -> u32 {
+fn solve(input: &[Vec<Vec<i32>>], overlap: OverlapFun) -> usize {
     input
         .iter()
         .filter(|x| overlap(&x[0], &x[1]))
         .count()
-        .try_into()
-        .unwrap()
+   
 }
 
-fn part1(input: &[Vec<Vec<i32>>]) -> u32 {
+fn part1(input: &[Vec<Vec<i32>>]) -> usize {
     solve(input, complete_overlap)
 }
 
-fn part2(input: &[Vec<Vec<i32>>]) -> u32 {
+fn part2(input: &[Vec<Vec<i32>>]) -> usize {
     solve(input, partial_overlap)
 }
 
