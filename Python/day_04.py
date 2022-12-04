@@ -37,9 +37,8 @@ def part_2(pairs):
 def main():
     lines = get_lines("input_04.txt")
     pairs = parse_input(lines)
-    print(pairs)
-    print("Part 1:", part_1(pairs))  # 508 too low
-    print("Part 2:", part_2(pairs))
+    print("Part 1:", part_1(pairs))  # 584
+    print("Part 2:", part_2(pairs))  # 933
 
 
 if __name__ == '__main__':
