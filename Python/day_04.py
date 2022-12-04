@@ -14,9 +14,7 @@ def complete_overlap(p1: List[int], p2: List[int]) -> bool:
 def partial_overlap(p1: List[int], p2: List[int]) -> bool:
     if p2[0] < p1[0]:
         p1, p2 = p2, p1
-    if p2[0] <= p1[1]:
-        return True
-    return False
+    return p2[0] <= p1[1]
 
 
 def solve(pairs: List[List[List[int]]], overlap: Callable[[List[int], List[int]], bool]) -> int:

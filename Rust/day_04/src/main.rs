@@ -24,10 +24,7 @@ fn partial_overlap(p1: &[i32], p2: &[i32]) -> bool {
     if bigger[0] < smaller[0] {
         mem::swap(&mut smaller, &mut bigger);
     }
-    if bigger[0] <= smaller[1] {
-        return true;
-    }
-    false
+    bigger[0] <= smaller[1] 
 }
 
 fn solve(input: &[Vec<Vec<i32>>], overlap: OverlapFun) -> usize {
