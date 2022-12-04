@@ -11,20 +11,7 @@ test = """2-4,6-8
 
 
 def parse_input(lines):
-    pairs = []
-    for line in lines:
-        tokenz = line.split(',')
-        pairs.append([line_to_int(p, '-') for p in tokenz])
-    return pairs
-
-
-def part_1(pairs):
-    sum = 0
-    for pair in pairs:
-        p1, p2 = pair
-        if complete_overlap(p1, p2):
-            sum += 1
-    return sum
+    return list(map(lambda line: [line_to_int(p, '-') for p in line.split(',')], lines))
 
 
 def complete_overlap(p1, p2):
@@ -39,22 +26,18 @@ def partial_overlap(p1, p2):
     return False
 
 
-def part_2(pairs):
-    sum = 0
-    for pair in pairs:
-        p1, p2 = pair
-        if partial_overlap(p1, p2):
-            sum += 1
+def part_1(pairs):
+    return sum(map(lambda p: complete_overlap(p[0], p[1]), pairs))
 
-            # print(pair)
-    return sum
+
+def part_2(pairs):
+    return sum(map(lambda p: partial_overlap(p[0], p[1]), pairs))
 
 
 def main():
     lines = get_lines("input_04.txt")
-    # lines = test.splitlines()
-    # print(lines)
     pairs = parse_input(lines)
+    print(pairs)
     print("Part 1:", part_1(pairs))  # 508 too low
     print("Part 2:", part_2(pairs))
 
