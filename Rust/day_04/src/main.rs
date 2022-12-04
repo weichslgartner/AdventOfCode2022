@@ -31,11 +31,7 @@ fn partial_overlap(p1: &[i32], p2: &[i32]) -> bool {
 }
 
 fn solve(input: &[Vec<Vec<i32>>], overlap: OverlapFun) -> usize {
-    input
-        .iter()
-        .filter(|x| overlap(&x[0], &x[1]))
-        .count()
-   
+    input.iter().filter(|x| overlap(&x[0], &x[1])).count()
 }
 
 fn part1(input: &[Vec<Vec<i32>>]) -> usize {
