@@ -6,15 +6,16 @@ fn parse_stacks(input: &str) -> Vec<Vec<char>> {
     input
         .lines()
         .filter(|x| x.contains('['))
-        .fold(vec![Vec::new(); 9*4], |mut accu, line| {
-            line.chars().enumerate().for_each(|(idx, c)| {
-                if idx >= accu.len() {
-                    accu.push(Vec::new());
-                }
-                if c.is_ascii_alphabetic() {
+        .fold(vec![Vec::new(); 9 * 4], |mut accu, line| {
+            line.chars()
+                .enumerate()
+                .filter(|(_, c)| c.is_ascii_alphabetic())
+                .for_each(|(idx, c)| {
+                    if idx >= accu.len() {
+                        accu.push(Vec::new());
+                    }
                     accu[idx].push(c);
-                }
-            });
+                });
             accu
         })
         .into_iter()
