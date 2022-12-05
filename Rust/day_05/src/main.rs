@@ -38,11 +38,11 @@ fn parse_moves(input: &str) -> Vec<Vec<usize>> {
         .collect()
 }
 
-fn extract_top_name(stacks: &[Vec<char>]) -> String {
-    stacks.iter().map(|s| s.last().unwrap()).collect()
+fn extract_top_name(stacks: &[Vec<char>]) -> Option<String> {
+    stacks.iter().map(|s| s.last()).collect()
 }
 
-fn part1(stacks: &mut [Vec<char>], moves: &[Vec<usize>]) -> String {
+fn part1(stacks: &mut [Vec<char>], moves: &[Vec<usize>]) -> Option<String> {
     moves.iter().for_each(|m| {
         if let [times, src, dst] = &m[..] {
             for _ in 0..*times {
@@ -54,7 +54,7 @@ fn part1(stacks: &mut [Vec<char>], moves: &[Vec<usize>]) -> String {
     extract_top_name(stacks)
 }
 
-fn part2(stacks: &mut [Vec<char>], moves: &[Vec<usize>]) -> String {
+fn part2(stacks: &mut [Vec<char>], moves: &[Vec<usize>]) -> Option<String> {
     moves.iter().for_each(|m| {
         if let [times, src, dst] = &m[..] {
             let to_move = stacks[src - 1].split_off(stacks[src - 1].len() - times);
@@ -67,6 +67,6 @@ fn part2(stacks: &mut [Vec<char>], moves: &[Vec<usize>]) -> String {
 fn main() {
     let input = include_str!("../../../inputs/input_05.txt");
     let (mut stacks, moves) = parse(input);
-    println!("Part 1: {}", part1(&mut stacks.clone(), &moves));
-    println!("Part 2: {}", part2(&mut stacks, &moves));
+    println!("Part 1: {}", part1(&mut stacks.clone(), &moves).unwrap());
+    println!("Part 2: {}", part2(&mut stacks, &moves).unwrap());
 }
