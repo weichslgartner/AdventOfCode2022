@@ -39,7 +39,7 @@ fn parse_moves(input: &str) -> Vec<Vec<usize>> {
 }
 
 fn extract_top_name(stacks: &[Vec<char>]) -> String {
-    stacks.iter().map(|s| s[s.len() - 1]).collect()
+    stacks.iter().map(|s| s.last().unwrap()).collect()
 }
 
 fn part1(stacks: &mut [Vec<char>], moves: &[Vec<usize>]) -> String {
@@ -57,15 +57,8 @@ fn part1(stacks: &mut [Vec<char>], moves: &[Vec<usize>]) -> String {
 fn part2(stacks: &mut [Vec<char>], moves: &[Vec<usize>]) -> String {
     moves.iter().for_each(|m| {
         if let [times, src, dst] = &m[..] {
-            let mut elements: Vec<char> = vec![];
-            for _ in 0..*times {
-                elements.push(stacks[src - 1].pop().unwrap());
-            }
-
-            elements.reverse();
-            for e in elements {
-                stacks[dst - 1].push(e);
-            }
+            let to_move = stacks[src - 1].split_off(stacks[src - 1].len() - times);
+            stacks[dst - 1].extend(to_move.iter());
         }
     });
     extract_top_name(stacks)
