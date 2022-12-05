@@ -27,8 +27,16 @@ fn parse(input: &str) -> (Vec<Vec<char>>, Vec<Vec<usize>>) {
     )
 }
 
-fn part1(stacks: &mut Vec<Vec<char>>, moves: &Vec<Vec<usize>>) -> String {
-    moves.into_iter().for_each(|m| {
+fn extract_top_name(stacks: &mut Vec<Vec<char>>) -> String {
+    let mut result = String::new();
+    for s in stacks {
+        result.push(s[s.len() - 1]);
+    }
+    result
+}
+
+fn part1(stacks: &mut Vec<Vec<char>>, moves: &[Vec<usize>]) -> String {
+    moves.iter().for_each(|m| {
         let times = m[0];
         let src = m[1];
         let dst = m[2];
@@ -37,15 +45,13 @@ fn part1(stacks: &mut Vec<Vec<char>>, moves: &Vec<Vec<usize>>) -> String {
             stacks[dst - 1].push(el);
         }
     });
-    let mut result = String::new();
-    for s in stacks {
-        result.push(s[s.len() - 1]);
-    }
-    result
+    extract_top_name(stacks)
 }
 
-fn part2(stacks: &mut Vec<Vec<char>>, moves: &Vec<Vec<usize>>) -> String {
-    moves.into_iter().for_each(|m| {
+
+
+fn part2(stacks: &mut Vec<Vec<char>>, moves: &[Vec<usize>]) -> String {
+    moves.iter().for_each(|m| {
         let times = m[0];
         let src = m[1];
         let dst = m[2];
@@ -59,11 +65,7 @@ fn part2(stacks: &mut Vec<Vec<char>>, moves: &Vec<Vec<usize>>) -> String {
             stacks[dst - 1].push(e);
         }
     });
-    let mut result = String::new();
-    for s in stacks {
-        result.push(s[s.len() - 1]);
-    }
-    result
+    extract_top_name(stacks)
 }
 
 fn main() {
