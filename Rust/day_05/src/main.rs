@@ -3,18 +3,24 @@ fn parse(input: &str) -> (Vec<Vec<char>>, Vec<Vec<usize>>) {
 }
 
 fn parse_stacks(input: &str) -> Vec<Vec<char>> {
-    let mut stacks: Vec<Vec<char>> = Vec::with_capacity(1);
-    for line in input.lines().filter(|x| x.contains('[')) {
-        for (idx, c) in line.chars().enumerate() {
-            if idx >= stacks.len()  {
-                stacks.push(Vec::new());
-            }
-            if c.is_ascii_alphabetic() {
-                stacks[idx].push(c);
-            }
-        }
-    }
-    stacks.into_iter().filter(|b| !b.is_empty()).collect()
+    input
+        .lines()
+        .into_iter()
+        .filter(|x| x.contains('['))
+        .fold(Vec::new(), |mut accu, line| {
+            line.chars().enumerate().for_each(|(idx, c)| {
+                if idx >= accu.len() {
+                    accu.push(Vec::new());
+                }
+                if c.is_ascii_alphabetic() {
+                    accu[idx].push(c);
+                }
+            });
+            accu
+        })
+        .into_iter()
+        .filter(|b| !b.is_empty())
+        .collect()
 }
 
 fn parse_moves(input: &str) -> Vec<Vec<usize>> {

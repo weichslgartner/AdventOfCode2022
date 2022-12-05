@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from aoc import get_lines
 import re
 
@@ -16,9 +14,7 @@ def parse_input(lines):
                     stacks[idx].append(c)
         if 'move' in line:
             moves.append(list(map(int, (re.findall(r'\d+', line)))))
-    stacks = list(filter(lambda l: len(l), stacks))
-    [s.reverse() for s in stacks]
-    return stacks, moves
+    return [s[::-1] for s in filter(lambda l: len(l), stacks)], moves
 
 
 def part_1(stacks, moves):
@@ -38,8 +34,8 @@ def part_2(stacks, moves):
 def main():
     lines = get_lines("input_05.txt")
     stacks, moves = parse_input(lines)
-    print("Part 1:", part_1(deepcopy(stacks), moves))  # GFTNRBZPF
-    print("Part 2:", part_2(stacks, moves))  # VRQWPDSGP
+    print("Part 1:", part_1([s.copy() for s in stacks], moves))  # GFTNRBZPF
+    print("Part 2:", part_2(stacks, moves))                      # VRQWPDSGP
 
 
 if __name__ == '__main__':
