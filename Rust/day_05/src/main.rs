@@ -5,7 +5,6 @@ fn parse(input: &str) -> (Vec<Vec<char>>, Vec<Vec<usize>>) {
 fn parse_stacks(input: &str) -> Vec<Vec<char>> {
     input
         .lines()
-        .into_iter()
         .filter(|x| x.contains('['))
         .fold(Vec::new(), |mut accu, line| {
             line.chars().enumerate().for_each(|(idx, c)| {
