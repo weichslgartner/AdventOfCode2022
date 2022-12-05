@@ -10,7 +10,7 @@ def parse_input(lines):
     for line in lines:
         if '[' in line:
             for idx, c in enumerate(line):
-                if idx < len(stacks) + 1:
+                if idx >= len(stacks):
                     stacks.append([])
                 if c.isalpha():
                     stacks[idx].append(c)

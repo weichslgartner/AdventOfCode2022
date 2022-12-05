@@ -6,7 +6,7 @@ fn parse_stacks(input: &str) -> Vec<Vec<char>> {
     let mut stacks: Vec<Vec<char>> = Vec::with_capacity(1);
     for line in input.lines().filter(|x| x.contains('[')) {
         for (idx, c) in line.chars().enumerate() {
-            if idx < stacks.len() + 1 {
+            if idx >= stacks.len()  {
                 stacks.push(Vec::new());
             }
             if c.is_ascii_alphabetic() {
