@@ -19,6 +19,7 @@ fn parse_stacks(input: &str) -> Vec<Vec<char>> {
         })
         .into_iter()
         .filter(|b| !b.is_empty())
+        .map(|x| x.into_iter().rev().collect())
         .collect()
 }
 
