@@ -1,16 +1,16 @@
-from collections import defaultdict
+from collections import defaultdict, deque
 
 from aoc import input_as_str
 
 
 def solve(line, window_size=4):
-    deque = []
+    deq = deque()
     char_cnt = defaultdict(int)
     for idx, c in enumerate(line):
         char_cnt[c] += 1
-        deque.append(c)
-        if len(deque) > window_size:
-            to_remove = deque.pop(0)
+        deq.append(c)
+        if len(deq) > window_size:
+            to_remove = deq.popleft()
             char_cnt[to_remove] -= 1
             if char_cnt[to_remove] == 0:
                 del char_cnt[to_remove]
