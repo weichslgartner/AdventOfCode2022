@@ -2,7 +2,7 @@ use std::collections::{HashMap, VecDeque};
 
 fn solve(input: &str, window_size: usize) -> usize {
     let mut deq = VecDeque::new();
-    let mut char_cnt: HashMap<char, usize> = HashMap::new();
+    let mut char_cnt= HashMap::with_capacity(window_size);
     for (idx, c) in input.chars().enumerate() {
         char_cnt.entry(c).and_modify(|val| *val += 1).or_insert(1);
         deq.push_back(c);
