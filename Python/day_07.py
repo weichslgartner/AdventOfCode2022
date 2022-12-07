@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
 from aoc import get_lines
@@ -14,7 +14,7 @@ class Node:
     size: int = 0
     is_file: bool = False
     parent: 'Node' = None
-    children: dict[str, 'Node'] = None
+    children: dict[str, 'Node'] = field(default_factory=dict)
 
 
 def parse_input(lines):
@@ -31,18 +31,10 @@ def parse_input(lines):
 
 def parse_ls_output(cur_node, tokenz):
     size_or_dir, name = tokenz[0], tokenz[1]
-    if size_or_dir == 'dir':
-        if not cur_node.children:
-            cur_node.children = {}
-        if name not in cur_node.children.keys():
-            child = Node(name=name, parent=cur_node)
-            cur_node.children[name] = child
-    else:
-        if not cur_node.children:
-            cur_node.children = {}
-        if name not in cur_node.children.keys():
-            child = Node(name=name, size=int(size_or_dir), is_file=True, parent=cur_node)
-            cur_node.children[name] = child
+    if size_or_dir == 'dir' and name not in cur_node.children.keys():
+        cur_node.children[name] = Node(name=name, parent=cur_node)
+    elif name not in cur_node.children.keys():
+        cur_node.children[name] = Node(name=name, size=int(size_or_dir), is_file=True, parent=cur_node)
 
 
 def parse_command(cur_node: Node, root: Node, line: str, tokenz: List[str]) -> Node:
@@ -53,8 +45,7 @@ def parse_command(cur_node: Node, root: Node, line: str, tokenz: List[str]) -> N
         if folder == '/':
             return root
         if folder not in cur_node.children.keys():
-            child = Node(folder)
-            cur_node.children[child.name] = child
+            cur_node.children[folder] = Node(folder)
         return cur_node.children[folder]
     if 'ls' in line:
         pass
@@ -71,24 +62,21 @@ def calc_sum(node: Node, sizes: List[int]) -> int:
     return sum_c
 
 
-def part_1(root: Node) -> int:
-    sizes = []
-    _ = calc_sum(root, sizes)
+def part_1(sizes: List[int]) -> int:
     return sum(filter(lambda x: x < 100000, sizes))
 
 
-def part_2(root: Node) -> int:
-    sizes = []
-    cur_used = calc_sum(root, sizes)
+def part_2(sizes: List[int], cur_used: int) -> int:
     needed = SIZE_NEEDED - (TOTAL_SIZE - cur_used)
     return min(filter(lambda x: x > needed, sizes))
 
 
 def main():
     lines = get_lines("input_07.txt")
-    root = parse_input(lines)
-    print("Part 1:", part_1(root))  # 1306611
-    print("Part 2:", part_2(root))  # 13210366
+    sizes = []
+    cur_used = calc_sum(parse_input(lines), sizes)
+    print("Part 1:", part_1(sizes))  # 1306611
+    print("Part 2:", part_2(sizes, cur_used))  # 13210366
 
 
 if __name__ == '__main__':
