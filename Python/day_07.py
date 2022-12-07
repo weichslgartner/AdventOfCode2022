@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 from aoc import get_lines
 
@@ -20,11 +21,11 @@ def parse_input(lines):
     root = Node('/')
     cur_node = root
     for line in lines:
-        tokenz = line.split(' ')
+        tokenz = line.split()
         if line.startswith('$'):
-            cur_node = parse_command(cur_node, line, root, tokenz)
+            cur_node = parse_command(cur_node=cur_node, root=root, line=line, tokenz=tokenz)
         else:
-            parse_ls_output(cur_node, tokenz)
+            parse_ls_output(cur_node=cur_node, tokenz=tokenz)
     return root
 
 
@@ -34,33 +35,33 @@ def parse_ls_output(cur_node, tokenz):
         if not cur_node.children:
             cur_node.children = {}
         if name not in cur_node.children.keys():
-            child = Node(name, parent=cur_node)
+            child = Node(name=name, parent=cur_node)
             cur_node.children[name] = child
     else:
         if not cur_node.children:
             cur_node.children = {}
         if name not in cur_node.children.keys():
-            child = Node(name, int(size_or_dir), is_file=True, parent=cur_node)
+            child = Node(name=name, size=int(size_or_dir), is_file=True, parent=cur_node)
             cur_node.children[name] = child
 
 
-def parse_command(cur_node, line, root, tokenz):
+def parse_command(cur_node: Node, root: Node, line: str, tokenz: List[str]) -> Node:
     if 'cd' in line:
-        if tokenz[2] == '..':
-            cur_node = cur_node.parent
-        elif tokenz[2] == '/':
-            cur_node = root
-        else:
-            if tokenz[2] not in cur_node.children.keys():
-                child = Node(tokenz[2])
-                cur_node.children[child.name] = child
-            cur_node = cur_node.children[tokenz[2]]
+        folder = tokenz[2]
+        if folder == '..':
+            return cur_node.parent
+        if folder == '/':
+            return root
+        if folder not in cur_node.children.keys():
+            child = Node(folder)
+            cur_node.children[child.name] = child
+        return cur_node.children[folder]
     if 'ls' in line:
         pass
     return cur_node
 
 
-def calc_sum(node, sizes):
+def calc_sum(node: Node, sizes: List[int]) -> int:
     if node.is_file:
         return node.size
     sum_c = 0
@@ -70,13 +71,13 @@ def calc_sum(node, sizes):
     return sum_c
 
 
-def part_1(root):
+def part_1(root: Node) -> int:
     sizes = []
     _ = calc_sum(root, sizes)
     return sum(filter(lambda x: x < 100000, sizes))
 
 
-def part_2(root):
+def part_2(root: Node) -> int:
     sizes = []
     cur_used = calc_sum(root, sizes)
     needed = SIZE_NEEDED - (TOTAL_SIZE - cur_used)
@@ -86,8 +87,8 @@ def part_2(root):
 def main():
     lines = get_lines("input_07.txt")
     root = parse_input(lines)
-    print("Part 1:", part_1(root)) # 1306611
-    print("Part 2:", part_2(root)) # 13210366
+    print("Part 1:", part_1(root))  # 1306611
+    print("Part 2:", part_2(root))  # 13210366
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@ from collections import namedtuple
 from itertools import filterfalse, tee, islice
 from pathlib import Path
 from typing import List, Callable, Iterable, Iterator
+import re
 
 
 class Point(namedtuple('Point', 'x y')):
@@ -51,7 +52,7 @@ def get_lines(file_name: str) -> List[str]:
 def input_as_str(file_name: str) -> str:
     file = Path(__file__).parents[1] / "inputs" / file_name
     with file.open('r') as f:
-        return f.read().strip().strip()
+        return f.read().strip()
     return ""
 
 
@@ -67,3 +68,7 @@ def take(n, iterable):
 
 def line_to_int(line: str, split_char=",") -> List[int]:
     return [int(i) for i in line.split(split_char) if len(i) > 0]
+
+
+def extract_all_ints(line: str) -> List[int]:
+    return list(map(int, (re.findall(r'\d+', line))))

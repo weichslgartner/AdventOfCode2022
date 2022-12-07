@@ -1,5 +1,4 @@
-from aoc import get_lines
-import re
+from aoc import get_lines, extract_all_ints
 
 
 def parse_input(lines):
@@ -13,7 +12,7 @@ def parse_input(lines):
                 if c.isalpha():
                     stacks[idx].append(c)
         if 'move' in line:
-            moves.append(list(map(int, (re.findall(r'\d+', line)))))
+            moves.append(extract_all_ints(line))
     return [s[::-1] for s in filter(lambda l: len(l), stacks)], moves
 
 
