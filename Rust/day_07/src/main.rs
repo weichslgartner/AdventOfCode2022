@@ -78,17 +78,16 @@ fn parse_command(
 }
 
 fn calc_sum<'a>(
-    node: &'a Rc<RefCell<Node>>,
+    node: &'a Node,
     sizes: &'a mut Vec<usize>,
 ) -> (usize, &'a mut Vec<usize>) {
-    if node.borrow().is_file {
-        return (node.borrow().size.unwrap(), sizes);
+    if node.is_file {
+        return (node.size.unwrap(), sizes);
     }
     let sum_c = node
-        .borrow()
         .children
         .values()
-        .map(|child| calc_sum(&Rc::clone(child), sizes).0)
+        .map(|child| calc_sum(&child.borrow(), sizes).0)
         .sum();
     sizes.push(sum_c);
     (sum_c, sizes)
@@ -107,7 +106,8 @@ fn main() {
     let input = include_str!("../../../inputs/input_07.txt");
     let root = parse_input(input);
     let mut sizes = vec![];
-    let (cur_used, sizes) = calc_sum(&root, &mut sizes);
+    let root_borrow = root.borrow();
+    let (cur_used, sizes) = calc_sum(&root_borrow, &mut sizes);
     println!("Part 1: {}", part1(sizes));
     println!("Part 2: {}", part2(sizes, cur_used));
 }
