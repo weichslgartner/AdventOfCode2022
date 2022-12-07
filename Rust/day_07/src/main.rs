@@ -30,7 +30,7 @@ fn parse_input(lines: &str) -> Rc<RefCell<Node>> {
     for line in lines.lines() {
         let tokenz: Vec<&str> = line.split(' ').collect();
         if line.starts_with('$') {
-            cur_node = parse_command(line, &tokenz, &mut cur_node, &root);
+            cur_node = parse_command(line, &tokenz, &cur_node, &root);
         } else if let [size_or_dir, name] = &tokenz[..] {
             parse_ls_output(size_or_dir, &cur_node, name);
         }
@@ -63,7 +63,7 @@ fn parse_ls_output(size_or_dir: &&str, cur_node: &Rc<RefCell<Node>>, name: &&str
 fn parse_command(
     line: &str,
     tokenz: &[&str],
-    cur_node: &mut Rc<RefCell<Node>>,
+    cur_node: &Rc<RefCell<Node>>,
     root: &Rc<RefCell<Node>>,
 ) -> Rc<RefCell<Node>> {
     if !line.contains("cd") {
@@ -71,13 +71,9 @@ fn parse_command(
     }
     let folder = tokenz[2];
     match folder {
-        ".." => {
-            Rc::clone(cur_node.borrow().parent.as_ref().unwrap())
-        }
+        ".." => Rc::clone(cur_node.borrow().parent.as_ref().unwrap()),
         "/" => root.clone(),
-        _ => {
-            cur_node.borrow_mut().children.get(folder).unwrap().clone()
-        }
+        _ => cur_node.borrow().children.get(folder).unwrap().clone(),
     }
 }
 
