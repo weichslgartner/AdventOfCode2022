@@ -41,25 +41,23 @@ fn parse_input(lines: &str) -> Rc<RefCell<Node>> {
 }
 
 fn parse_ls_output(size_or_dir: &&str, cur_node: &Rc<RefCell<Node>>, name: &&str) {
-    if *size_or_dir == "dir" && !cur_node.borrow().children.contains_key(*name) {
-        let child = Rc::new(RefCell::new(Node::new()));
-        let mut mut_child = child.borrow_mut();
-        mut_child.parent = Some(Rc::clone(cur_node));
-        cur_node
-            .borrow_mut()
-            .children
-            .insert(name.to_string(), Rc::clone(&child));
-    } else if !cur_node.borrow().children.contains_key(*name) {
-        let child = Rc::new(RefCell::new(Node::new()));
-        let mut mut_child = child.borrow_mut();
+    if !cur_node.borrow().children.contains_key(*name) {
+        insert_child(size_or_dir, cur_node, name);
+    }
+}
+
+fn insert_child(size_or_dir: &&str, cur_node: &Rc<RefCell<Node>>, name: &&str) {
+    let child = Rc::new(RefCell::new(Node::new()));
+    let mut mut_child = child.borrow_mut();
+    if *size_or_dir != "dir" {
         mut_child.is_file = true;
         mut_child.size = Some(size_or_dir.parse().unwrap());
-        mut_child.parent = Some(Rc::clone(cur_node));
-        cur_node
-            .borrow_mut()
-            .children
-            .insert(name.to_string(), Rc::clone(&child));
     }
+    mut_child.parent = Some(Rc::clone(cur_node));
+    cur_node
+        .borrow_mut()
+        .children
+        .insert(name.to_string(), Rc::clone(&child));
 }
 
 fn parse_command(
