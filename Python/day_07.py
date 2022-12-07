@@ -52,14 +52,11 @@ def parse_command(cur_node: Node, root: Node, line: str, tokenz: List[str]) -> N
     return cur_node
 
 
-def calc_sum(node: Node, sizes: List[int]) -> int:
+def calc_sum(node: Node, sizes: List[int]) -> (int, List[int]):
     if node.is_file:
-        return node.size
-    sum_c = 0
-    for child in node.children.values():
-        sum_c += calc_sum(child, sizes)
-    sizes.append(sum_c)
-    return sum_c
+        return node.size, sizes
+    sizes.append(sum(calc_sum(child, sizes)[0] for child in node.children.values()))
+    return sizes[-1], sizes
 
 
 def part_1(sizes: List[int]) -> int:
@@ -73,8 +70,7 @@ def part_2(sizes: List[int], cur_used: int) -> int:
 
 def main():
     lines = get_lines("input_07.txt")
-    sizes = []
-    cur_used = calc_sum(parse_input(lines), sizes)
+    cur_used, sizes = calc_sum(parse_input(lines), [])
     print("Part 1:", part_1(sizes))  # 1306611
     print("Part 2:", part_2(sizes, cur_used))  # 13210366
 
