@@ -2,9 +2,11 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-const TOTAL_SIZE: usize = 70000000;
+const TOTAL_SIZE: usize = 70_000_000;
 
-const SIZE_NEEDED: usize = 30000000;
+const SIZE_NEEDED: usize = 30_000_000;
+
+const SMALL_FILE_LIMIT: usize = 100_000;
 
 struct Node {
     pub size: Option<usize>,
@@ -77,10 +79,7 @@ fn parse_command(
     }
 }
 
-fn calc_sum<'a>(
-    node: &'a Node,
-    sizes: &'a mut Vec<usize>,
-) -> (usize, &'a mut Vec<usize>) {
+fn calc_sum<'a>(node: &'a Node, sizes: &'a mut Vec<usize>) -> (usize, &'a mut Vec<usize>) {
     if node.is_file {
         return (node.size.unwrap(), sizes);
     }
@@ -94,7 +93,7 @@ fn calc_sum<'a>(
 }
 
 fn part1(sizes: &[usize]) -> usize {
-    sizes.iter().filter(|x| **x < 100000).sum()
+    sizes.iter().filter(|x| **x < SMALL_FILE_LIMIT).sum()
 }
 
 fn part2(sizes: &[usize], cur_used: usize) -> usize {
