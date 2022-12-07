@@ -8,7 +8,7 @@ const SIZE_NEEDED: usize = 30000000;
 
 struct Node {
     pub size: Option<usize>,
-    pub is_file: Option<bool>,
+    pub is_file: bool,
     pub children: HashMap<String, Rc<RefCell<Node>>>,
     pub parent: Option<Rc<RefCell<Node>>>,
 }
@@ -17,7 +17,7 @@ impl Node {
     pub fn new() -> Node {
         Node {
             size: None,
-            is_file: Some(false),
+            is_file: false,
             children: HashMap::new(),
             parent: None,
         }
@@ -50,7 +50,7 @@ fn parse_ls_output(size_or_dir: &&str, cur_node: &Rc<RefCell<Node>>, name: &&str
     } else if !cur_node.borrow().children.contains_key(*name) {
         let child = Rc::new(RefCell::new(Node::new()));
         let mut mut_child = child.borrow_mut();
-        mut_child.is_file = Some(true);
+        mut_child.is_file = true;
         mut_child.size = Some(size_or_dir.parse().unwrap());
         mut_child.parent = Some(Rc::clone(cur_node));
         cur_node
@@ -78,7 +78,7 @@ fn parse_command(
 }
 
 fn calc_sum(node: &Rc<RefCell<Node>>, sizes: &mut Vec<usize>) -> usize {
-    if node.borrow().is_file.unwrap() {
+    if node.borrow().is_file {
         return node.borrow().size.unwrap();
     }
     let mut sum_c = 0;
