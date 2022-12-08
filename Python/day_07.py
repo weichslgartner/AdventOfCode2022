@@ -3,9 +3,9 @@ from typing import List
 
 from aoc import get_lines
 
-TOTAL_SIZE = 70000000
+TOTAL_SIZE = 70_000_000
 
-SIZE_NEEDED = 30000000
+SIZE_NEEDED = 30_000_000
 
 
 @dataclass
