@@ -1,3 +1,4 @@
+from itertools import accumulate
 from typing import List, Set
 
 from aoc import get_lines, Point
@@ -36,7 +37,10 @@ def add_to_seen_and_blocked(grid: List[List[int]], neighbors: List[Point], seen_
     if len(neighbors) > 0:
         if all(grid[cur.y][cur.x] > grid[n.y][n.x] for n in neighbors):
             seen_set.add(cur)
-        add_to_block(blocked_by, cur, grid, neighbors)
+            # we see the border no need to calculate the blocked_by with add_to_block()
+            blocked_by[cur.y][cur.x] *= len(neighbors)
+        else:
+            add_to_block(blocked_by, cur, grid, neighbors)
     else:
         # border elements
         blocked_by[cur.y][cur.x] = 0
@@ -49,6 +53,7 @@ def add_to_block(blocked_by: List[List[int]], cur: Point, grid: List[List[int]],
         blocked_n += 1
         if grid[n.y][n.x] >= grid[cur.y][cur.x]:
             break
+    # blocked_n = sum(accumulate(func=lambda accu, n: accu and (grid[n.y][n.x] < grid[cur.y][cur.x]), iterable=reversed(neighbors),initial=True))
     blocked_by[cur.y][cur.x] *= blocked_n
 
 
