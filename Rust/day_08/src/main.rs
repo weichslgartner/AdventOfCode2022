@@ -23,11 +23,10 @@ fn parse(input: &str) -> (Vec<Vec<u32>>, Vec<Vec<u32>>) {
     )
 }
 
-fn generate_seen_and_blocked(grid: Vec<Vec<u32>>, mut blocked_by: Vec<Vec<u32>>) -> usize {
+fn generate_seen_and_blocked(grid: Vec<Vec<u32>>, mut blocked_by: Vec<Vec<u32>>) -> (usize,u32) {
     let x_max = grid[0].len();
     let y_max = grid.len();
     let mut seen_set = HashSet::new();
-    let bla = (0..10).rev();
     let ranges: [(Vec<usize>, Vec<usize>, bool); 4] = [
         ((0..y_max).collect(), (0..x_max).collect(), false),
         ((0..y_max).collect(), (0..x_max).rev().collect(), false),
@@ -47,15 +46,27 @@ fn generate_seen_and_blocked(grid: Vec<Vec<u32>>, mut blocked_by: Vec<Vec<u32>>)
                     {
                         seen_set.insert(cur.clone());
                     }
+                    let mut blocked_n = 0;
+                    for n in neighbors.iter().rev(){
+                        blocked_n += 1;
+                        if grid[n.y][n.x] >= grid[cur.y][cur.x]{
+                            break;
+                        }
+                            
+                    }
+                       
+                    blocked_by[cur.y][cur.x] *= blocked_n
+                
                 } else {
                     seen_set.insert(cur.clone());
+                    blocked_by[cur.y][cur.x] = 0;
                 }
 
                 neighbors.push(cur);
             }
         }
     }
-    seen_set.len()
+    (seen_set.len(),*blocked_by.iter().flat_map(|x|x.iter()).max().unwrap())
     
 }
 
@@ -71,6 +82,6 @@ fn main() {
     let input = include_str!("../../../inputs/input_08.txt");
     let (grid, mut blocked) = parse(input);
     let res = generate_seen_and_blocked(grid, blocked);
-    println!("Part 1: {}",res);
-    println!("Part 2: {}",0);
+    println!("Part 1: {}",res.0);
+    println!("Part 2: {}",res.1);
 }
