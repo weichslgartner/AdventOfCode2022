@@ -23,7 +23,10 @@ fn parse(input: &str) -> (Vec<Vec<u32>>, Vec<Vec<u32>>) {
     )
 }
 
-fn generate_seen_and_blocked(grid: Vec<Vec<u32>>, mut blocked_by: Vec<Vec<u32>>) -> (usize,u32) {
+fn generate_seen_and_blocked(
+    grid: Vec<Vec<u32>>,
+    mut blocked_by: Vec<Vec<u32>>,
+) -> (HashSet<Point>, Vec<Vec<u32>>) {
     let x_max = grid[0].len();
     let y_max = grid.len();
     let mut seen_set = HashSet::new();
@@ -39,24 +42,8 @@ fn generate_seen_and_blocked(grid: Vec<Vec<u32>>, mut blocked_by: Vec<Vec<u32>>)
             for j in r1.iter() {
                 let cur = to_point(*i, *j, *invert);
                 if !neighbors.is_empty() {
-                    if neighbors
-                        .clone()
-                        .into_iter()
-                        .all(|n: Point| grid[cur.y][cur.x] > grid[n.y][n.x])
-                    {
-                        seen_set.insert(cur.clone());
-                    }
-                    let mut blocked_n = 0;
-                    for n in neighbors.iter().rev(){
-                        blocked_n += 1;
-                        if grid[n.y][n.x] >= grid[cur.y][cur.x]{
-                            break;
-                        }
-                            
-                    }
-                       
-                    blocked_by[cur.y][cur.x] *= blocked_n
-                
+                    add_to_seen(&neighbors, &grid, &cur, &mut seen_set);
+                    update_blocked_by(&neighbors, &grid, &cur, &mut blocked_by);
                 } else {
                     seen_set.insert(cur.clone());
                     blocked_by[cur.y][cur.x] = 0;
@@ -66,22 +53,47 @@ fn generate_seen_and_blocked(grid: Vec<Vec<u32>>, mut blocked_by: Vec<Vec<u32>>)
             }
         }
     }
-    (seen_set.len(),*blocked_by.iter().flat_map(|x|x.iter()).max().unwrap())
-    
+    (seen_set, blocked_by)
 }
 
-fn part1(input: &str) -> &str {
-    input
+fn update_blocked_by(
+    neighbors: &[Point],
+    grid: &[Vec<u32>],
+    cur: &Point,
+    blocked_by: &mut [Vec<u32>],
+) {
+    let mut blocked_n = 0;
+    for n in neighbors.iter().rev() {
+        blocked_n += 1;
+        if grid[n.y][n.x] >= grid[cur.y][cur.x] {
+            break;
+        }
+    }
+    blocked_by[cur.y][cur.x] *= blocked_n
 }
 
-fn part2(input: &str) -> &str {
-    input
+fn add_to_seen(neighbors: &[Point], grid: &[Vec<u32>], cur: &Point, seen_set: &mut HashSet<Point>) {
+    if neighbors
+        .iter()
+        .cloned()
+        .all(|n: Point| grid[cur.y][cur.x] > grid[n.y][n.x])
+    {
+        seen_set.insert(cur.clone());
+    }
+}
+
+fn part1(seen_set: HashSet<Point>) -> usize {
+    seen_set.len()
+}
+
+fn part2(blocked_by: &[Vec<u32>]) -> u32 {
+    *blocked_by.iter().flat_map(|x| x.iter()).max().unwrap()
 }
 
 fn main() {
     let input = include_str!("../../../inputs/input_08.txt");
-    let (grid, mut blocked) = parse(input);
-    let res = generate_seen_and_blocked(grid, blocked);
-    println!("Part 1: {}",res.0);
-    println!("Part 2: {}",res.1);
+    let (grid, blocked) = parse(input);
+    let (seen_set, blocked_by) = generate_seen_and_blocked(grid, blocked);
+    println!("Part 1: {}", part1(seen_set));
+    println!("Part 2: {}", part2(&blocked_by));
 }
