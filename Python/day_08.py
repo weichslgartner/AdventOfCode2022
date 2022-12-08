@@ -19,12 +19,16 @@ def generate_seen_and_blocked(blocked_by: List[List[int]], grid: List[List[int]]
         for i in r0:
             neighbors = []
             for j in r1:
-                cur = Point(i, j)
-                if invert:
-                    cur = Point(j, i)
+                cur = to_point(i, j, invert)
                 add_to_seen_and_blocked(grid, neighbors, seen_set, cur, blocked_by)
                 neighbors.append(cur)
     return seen_set, blocked_by
+
+
+def to_point(i: int, j: int, invert: bool) -> Point:
+    if invert:
+        Point(j, i)
+    return Point(i, j)
 
 
 def add_to_seen_and_blocked(grid: List[List[int]], neighbors: List[Point], seen_set: Set[Point], cur: Point,
@@ -60,8 +64,8 @@ def main():
     lines = get_lines("input_08_test.txt")
     grid, blocked_by = parse_input(lines)
     seen_set, blocked_by = generate_seen_and_blocked(blocked_by, grid)
-    print("Part 1:", part_1(seen_set))      # 1662
-    print("Part 2:", part_2(blocked_by))    # 537600
+    print("Part 1:", part_1(seen_set))  # 1662
+    print("Part 2:", part_2(blocked_by))  # 537600
 
 
 if __name__ == '__main__':

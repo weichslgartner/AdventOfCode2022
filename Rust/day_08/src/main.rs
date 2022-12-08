@@ -48,7 +48,6 @@ fn generate_seen_and_blocked(
                     seen_set.insert(cur.clone());
                     blocked_by[cur.y][cur.x] = 0;
                 }
-
                 neighbors.push(cur);
             }
         }
