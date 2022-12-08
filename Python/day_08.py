@@ -7,7 +7,7 @@ def parse_input(lines: List[str]) -> (List[List[int]], List[List[int]]):
     return [[int(c) for c in line] for line in lines], [[1 for _ in line] for line in lines]
 
 
-def generate_seen_and_blocked(blocked_by: List[List[int]], grid: List[List[int]]):
+def generate_seen_and_blocked(blocked_by: List[List[int]], grid: List[List[int]]) -> (Set[Point], List[List[int]]):
     assert (len(grid) > 0)
     x_max = len(grid[0])
     y_max = len(grid)
@@ -27,7 +27,7 @@ def generate_seen_and_blocked(blocked_by: List[List[int]], grid: List[List[int]]
 
 def to_point(i: int, j: int, invert: bool) -> Point:
     if invert:
-        Point(j, i)
+        return Point(j, i)
     return Point(i, j)
 
 
@@ -61,7 +61,7 @@ def part_2(blocked_by: List[List[int]]) -> int:
 
 
 def main():
-    lines = get_lines("input_08_test.txt")
+    lines = get_lines("input_08.txt")
     grid, blocked_by = parse_input(lines)
     seen_set, blocked_by = generate_seen_and_blocked(blocked_by, grid)
     print("Part 1:", part_1(seen_set))  # 1662
