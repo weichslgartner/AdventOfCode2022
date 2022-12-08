@@ -60,8 +60,8 @@ def main():
     lines = get_lines("input_08_test.txt")
     grid, blocked_by = parse_input(lines)
     seen_set, blocked_by = generate_seen_and_blocked(blocked_by, grid)
-    print("Part 1:", part_1(seen_set))  # 1662
-    print("Part 2:", part_2(blocked_by))  # 537600
+    print("Part 1:", part_1(seen_set))      # 1662
+    print("Part 2:", part_2(blocked_by))    # 537600
 
 
 if __name__ == '__main__':
