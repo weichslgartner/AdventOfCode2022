@@ -29,7 +29,7 @@ fn part2(commands: &Vec<(char, u32)>) -> usize {
 fn get_neighbours_8(p: Point) -> HashSet<Point> {
     (-1..=1)
         .flat_map(|x| (-1..=1).map(move |y| (x, y)))
-        .filter(|x| x.0 != 0 || x.1 != 0)
+        .filter(|(x, y)| *x != 0 || *y != 0)
         .map(|(x, y)| Point {
             x: p.x + x,
             y: p.y + y,
@@ -45,16 +45,6 @@ fn dir_to_point(direction: char) -> Point {
         'D' => Point { x: 0, y: -1 },
         _ => unreachable!(),
     }
-}
-
-fn sign(x: i32) -> i32 {
-    if x == 0 {
-        return 0;
-    }
-    if x < 0 {
-        return -1;
-    }
-    1
 }
 
 fn solve(commands: &Vec<(char, u32)>, length: usize) -> usize {
@@ -76,8 +66,8 @@ fn move_body_and_tail(positions: &mut HashMap<usize, Point>) {
     for i in 1..positions.len() {
         if !get_neighbours_8(positions[&i]).contains(&positions[&(i - 1)]) {
             let new_pos = Point {
-                x: positions[&i].x + sign(positions[&(i - 1)].x - positions[&i].x),
-                y: positions[&i].y + sign(positions[&(i - 1)].y - positions[&i].y),
+                x: positions[&i].x + (positions[&(i - 1)].x - positions[&i].x).signum(),
+                y: positions[&i].y + (positions[&(i - 1)].y - positions[&i].y).signum(),
             };
             positions.insert(i, new_pos);
         }
