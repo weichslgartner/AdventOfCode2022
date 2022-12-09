@@ -41,8 +41,7 @@ def solve(commands: List[Tuple[str, int]], length: int = 10) -> int:
                 if positions[i - 1] not in get_neighbours_8(positions[i]):
                     positions[i] = Point(positions[i].x + sign(positions[i - 1].x - positions[i].x),
                                          positions[i].y + sign(positions[i - 1].y - positions[i].y))
-                if i == length - 1:
-                    tail_set.add(positions[length - 1])
+            tail_set.add(positions[length - 1])
     return len(tail_set)
 
 
@@ -57,8 +56,8 @@ def part_2(commands: List[Tuple[str, int]]) -> int:
 def main():
     lines = get_lines("input_09.txt")
     commands = parse_input(lines)
-    print("Part 1:", solve(commands, 2))
-    print("Part 2:", solve(commands))
+    print("Part 1:", solve(commands, 2))    # 5874
+    print("Part 2:", solve(commands, 10))   # 2467
 
 
 if __name__ == '__main__':
