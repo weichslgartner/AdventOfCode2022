@@ -65,11 +65,10 @@ fn solve(commands: &Vec<(char, u32)>, length: usize) -> usize {
 fn move_body_and_tail(positions: &mut HashMap<usize, Point>) {
     for i in 1..positions.len() {
         if !get_neighbours_8(positions[&i]).contains(&positions[&(i - 1)]) {
-            let new_pos = Point {
+            positions.insert(i, Point {
                 x: positions[&i].x + (positions[&(i - 1)].x - positions[&i].x).signum(),
                 y: positions[&i].y + (positions[&(i - 1)].y - positions[&i].y).signum(),
-            };
-            positions.insert(i, new_pos);
+            });
         }
     }
 }
