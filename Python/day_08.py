@@ -53,6 +53,7 @@ def add_to_block(blocked_by: List[List[int]], cur: Point, grid: List[List[int]],
         blocked_n += 1
         if grid[n.y][n.x] >= grid[cur.y][cur.x]:
             break
+    # the accumulate is slower than early exit loops 383 ms vs 233 ms
     # blocked_n = sum(accumulate(func=lambda accu, n: accu and (grid[n.y][n.x] < grid[cur.y][cur.x]), iterable=reversed(neighbors),initial=True))
     blocked_by[cur.y][cur.x] *= blocked_n
 
