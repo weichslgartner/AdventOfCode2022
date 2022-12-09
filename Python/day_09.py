@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from aoc import get_lines, Point
 
@@ -7,18 +7,18 @@ def get_neighbours_8(p: Point) -> List[Point]:
     return [Point(p.x + x, p.y + y) for y in range(-1, 2) for x in range(-1, 2) if x != 0 or y != 0]
 
 
-def parse_input(lines: List[str]) -> List[(str, str)]:
-    return [line.split() for line in lines]
+def parse_input(lines: List[str]) -> List[Tuple[str, int]]:
+    return [(e[0], int(e[1])) for e in map(lambda x: x.split(), lines)]
 
 
-def dir_to_point(dir: str) -> Point:
-    if dir == 'R':
+def dir_to_point(direction: str) -> Point:
+    if direction == 'R':
         return Point(1, 0)
-    if dir == 'L':
+    if direction == 'L':
         return Point(-1, 0)
-    if dir == 'U':
+    if direction == 'U':
         return Point(0, 1)
-    if dir == 'D':
+    if direction == 'D':
         return Point(0, -1)
 
 
@@ -30,12 +30,12 @@ def sign(x: int) -> int:
     return 1
 
 
-def solve(commands: List[(str, str)], length: int = 10) -> int:
+def solve(commands: List[Tuple[str, int]], length: int = 10) -> int:
     positions = {i: Point(0, 0) for i in range(length)}
     tail_set = set()
-    for direct, l in commands:
+    for direct, steps in commands:
         p = dir_to_point(direct)
-        for _ in range(int(l)):
+        for _ in range(steps):
             positions[0] = Point(positions[0].x + p.x, positions[0].y + p.y)
             for i in range(1, length):
                 if positions[i - 1] not in get_neighbours_8(positions[i]):
@@ -46,11 +46,11 @@ def solve(commands: List[(str, str)], length: int = 10) -> int:
     return len(tail_set)
 
 
-def part_1(commands: List[(str, str)]) -> int:
+def part_1(commands: List[Tuple[str, int]]) -> int:
     return solve(commands, 2)
 
 
-def part_2(commands: List[(str, str)]) -> int:
+def part_2(commands: List[Tuple[str, int]]) -> int:
     return solve(commands, 10)
 
 
