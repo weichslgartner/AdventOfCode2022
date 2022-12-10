@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 #[derive(Eq, Hash, PartialEq, Debug, Clone, Copy)]
 struct Point {
@@ -48,27 +48,26 @@ fn dir_to_point(direction: char) -> Point {
 }
 
 fn solve(commands: &Vec<(char, u32)>, length: usize) -> usize {
-    let mut positions: HashMap<usize, Point> =
-        (0..length).map(|i| (i, Point { x: 0, y: 0 })).collect();
+    let mut positions: Vec<Point> = vec![Point { x: 0, y: 0 }; length];
     let mut tail_set = HashSet::new();
     for (direct, steps) in commands {
         let direct_point = dir_to_point(*direct);
         for _ in 0..*steps {
-            positions.insert(0, move_head(positions[&0], direct_point));
+            positions[0] = move_head(positions[0], direct_point);
             move_body_and_tail(&mut positions);
-            tail_set.insert(positions[&(length - 1)]);
+            tail_set.insert(positions[(length - 1)]);
         }
     }
     tail_set.len()
 }
 
-fn move_body_and_tail(positions: &mut HashMap<usize, Point>) {
+fn move_body_and_tail(positions: &mut Vec<Point>) {
     for i in 1..positions.len() {
-        if !get_neighbours_8(positions[&i]).contains(&positions[&(i - 1)]) {
-            positions.insert(i, Point {
-                x: positions[&i].x + (positions[&(i - 1)].x - positions[&i].x).signum(),
-                y: positions[&i].y + (positions[&(i - 1)].y - positions[&i].y).signum(),
-            });
+        if !get_neighbours_8(positions[i]).contains(&positions[(i - 1)]) {
+            positions[i] = Point {
+                x: positions[i].x + (positions[(i - 1)].x - positions[i].x).signum(),
+                y: positions[i].y + (positions[(i - 1)].y - positions[i].y).signum(),
+            };
         }
     }
 }

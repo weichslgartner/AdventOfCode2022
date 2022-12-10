@@ -31,7 +31,7 @@ def sign(x: int) -> int:
 
 
 def solve(commands: List[Tuple[str, int]], length: int = 10) -> int:
-    positions = {i: Point(0, 0) for i in range(length)}
+    positions = [ Point(0, 0) for _ in range(length)]
     tail_set = set()
     for direct, steps in commands:
         direct_point = dir_to_point(direct)
