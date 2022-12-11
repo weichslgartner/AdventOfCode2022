@@ -84,17 +84,11 @@ fn parse_monkey(input: &str) -> Monkey {
             monkey.if_false = line.split(' ').last().unwrap().parse().unwrap();
         }
     }
-
     monkey
 }
 
 fn parse(input: &str) -> Vec<Monkey> {
-    let mut monkeys = vec![];
-    for monkey_description in input.split("\n\n") {
-        monkeys.push(parse_monkey(monkey_description));
-    }
-
-    monkeys
+    input.split("\n\n").map(parse_monkey).collect()
 }
 fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u64 {
     let mod_op: u64 = monkeys.iter().map(|m| m.div_by).product();
@@ -105,11 +99,14 @@ fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u64 {
                 .items
                 .iter()
                 .map(|item| {
-                    let result = calc_level(item, &monkeys, i, part2, mod_op);
-                    let idx = get_index(result, &monkeys, i);
+                    let result = calc_level(item, monkeys, i, part2, mod_op);
+                    let idx = get_index(result, monkeys, i);
                     (idx, result)
-                }).collect::<Vec<_>>();
-            to_move.iter().for_each(|(idx, result)| monkeys[*idx].items.push(*result));
+                })
+                .collect::<Vec<_>>();
+            to_move
+                .iter()
+                .for_each(|(idx, result)| monkeys[*idx].items.push(*result));
             monkeys[i].items.clear();
         }
     }
@@ -122,12 +119,10 @@ fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u64 {
 }
 
 fn get_index(result: u64, monkeys: &[Monkey], i: usize) -> usize {
-    let idx = if (result % monkeys[i].div_by) == 0 {
-        monkeys[i].if_true
-    } else {
-        monkeys[i].if_false
-    };
-    idx
+    if (result % monkeys[i].div_by) == 0 {
+        return monkeys[i].if_true;
+    }
+    monkeys[i].if_false
 }
 
 fn calc_level(item: &u64, monkeys: &[Monkey], i: usize, part2: bool, mod_op: u64) -> u64 {
@@ -135,13 +130,15 @@ fn calc_level(item: &u64, monkeys: &[Monkey], i: usize, part2: bool, mod_op: u64
     if let Operand::Value(i) = monkeys[i].operation.operand_2 {
         op2 = i;
     }
-    let mut result = if monkeys[i].operation.operator == '+' {
+    let result = if monkeys[i].operation.operator == '+' {
         *item + op2
     } else {
         *item * op2
     };
-    result = if part2 { result % mod_op } else { result / 3 };
-    result
+    if part2 {
+        return result % mod_op;
+    }
+    result / 3
 }
 
 fn part1(monkeys: &mut Vec<Monkey>) -> u64 {

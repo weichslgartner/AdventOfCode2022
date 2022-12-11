@@ -64,7 +64,6 @@ def solve(monkeys: List[Monkey], rounds: int = 10000, part2: bool = False) -> in
                 else:
                     monkeys[monkey.if_false].items.append(item)
             monkey.items = []
-    print(sorted([m.inspect_cnt for m in monkeys]))
     return operator.mul(*sorted(map(lambda m: m.inspect_cnt, monkeys), reverse=True)[:2])
 
 
