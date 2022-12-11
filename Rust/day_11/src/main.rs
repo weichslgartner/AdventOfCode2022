@@ -99,8 +99,8 @@ fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u64 {
                 .items
                 .iter()
                 .map(|item| {
-                    let result = calc_level(item, monkeys, i, part2, mod_op);
-                    (get_index(result, monkeys, i), result)
+                    let result = calc_level(item, &monkeys[i].operation, mod_op, part2);
+                    (get_index(result, &monkeys[i]), result)
                 })
                 .collect::<Vec<_>>();
             to_move
@@ -109,7 +109,6 @@ fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u64 {
             monkeys[i].items.clear();
         }
     }
-
     calc_monkey_business(monkeys)
 }
 
@@ -121,19 +120,19 @@ fn calc_monkey_business(monkeys: &[Monkey]) -> u64 {
     heap.pop().unwrap() * heap.pop().unwrap()
 }
 
-fn get_index(result: u64, monkeys: &[Monkey], i: usize) -> usize {
-    if (result % monkeys[i].div_by) == 0 {
-        return monkeys[i].if_true;
+fn get_index(result: u64, monkey: &Monkey) -> usize {
+    if (result % monkey.div_by) == 0 {
+        return monkey.if_true;
     }
-    monkeys[i].if_false
+    monkey.if_false
 }
 
-fn calc_level(item: &u64, monkeys: &[Monkey], i: usize, part2: bool, mod_op: u64) -> u64 {
+fn calc_level(item: &u64, oper: &Operation, mod_op: u64, part2: bool) -> u64 {
     let mut op2 = *item;
-    if let Operand::Value(i) = monkeys[i].operation.operand_2 {
+    if let Operand::Value(i) = oper.operand_2 {
         op2 = i;
     }
-    let result = if monkeys[i].operation.operator == '+' {
+    let result = if oper.operator == '+' {
         *item + op2
     } else {
         *item * op2
