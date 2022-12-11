@@ -1,21 +1,22 @@
 use std::collections::BinaryHeap;
 #[derive(Debug, Clone, PartialEq, Copy)]
 enum Operand {
-    Value(i64),
+    Value(u128),
     Old,
 }
 impl std::str::FromStr for Operand {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Ok(val) = s.parse::<i64>() {
+        if let Ok(val) = s.parse::<u128>() {
             return Ok(Operand::Value(val));
         }
-        return Ok(Operand::Old);
+        Ok(Operand::Old)
     }
 }
 
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 struct Operation {
     operand_1: Operand,
     operand_2: Operand,
@@ -25,12 +26,12 @@ struct Operation {
 #[derive(Debug, Clone)]
 struct Monkey {
     number: u32,
-    items: Vec<i64>,
+    items: Vec<u128>,
     operation: Operation,
-    div_by: i64,
+    div_by: u128,
     if_true: usize,
     if_false: usize,
-    inspect_cnt: usize,
+    inspect_cnt: u128,
 }
 
 impl Monkey {
@@ -50,29 +51,6 @@ impl Monkey {
         }
     }
 }
-
-// for line in lines:
-// if "Monkey" in line:
-//     new_monkey = Monkey(number=extract_all_ints(line).pop())
-// elif "Starting items" in line:
-//     new_monkey.items = [x for x in extract_all_ints(line)]
-// elif "Operation" in line:
-//     tokens = line.split('=')[1].split()
-//     new_monkey.operation = Operation(*tokens)
-// elif "Test: divisible" in line:
-//     new_monkey.div_by = extract_all_ints(line).pop()
-// elif "If true:" in line:
-//     new_monkey.if_true = extract_all_ints(line).pop()
-// elif "If false:" in line:
-//     new_monkey.if_false = extract_all_ints(line).pop()
-//     monkeys.append(new_monkey)
-
-// Monkey 1:
-//   Starting items: 54, 65, 75, 74
-//   Operation: new = old + 6
-//   Test: divisible by 19
-//     If true: throw to monkey 2
-//     If false: throw to monkey 0
 
 fn parse_monkey(input: &str) -> Monkey {
     let mut monkey = Monkey::new();
@@ -118,23 +96,23 @@ fn parse(input: &str) -> Vec<Monkey> {
 
     monkeys
 }
-fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> usize {
-    let mod_op: i64 = monkeys.iter().fold(1, |accu, m| accu * m.div_by);
+fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u128 {
+    let mod_op: u128 = monkeys.iter().map(|m| m.div_by).product();
     for _ in 0..rounds {
         for i in 0..monkeys.len() {
-            monkeys[i].inspect_cnt += monkeys[i].items.len();
+            monkeys[i].inspect_cnt += monkeys[i].items.len() as u128;
             let mut temp = vec![];
             for item in monkeys[i].items.iter() {
-                let mut op2 = item.clone();
+                let mut op2 = *item;
                 if let Operand::Value(i) = monkeys[i].operation.operand_2 {
                     op2 = i;
                 }
-                let mut result: i64 = if monkeys[i].operation.operator == '+' {
-                    item.clone() + op2
+                let mut result = if monkeys[i].operation.operator == '+' {
+                    *item + op2
                 } else {
-                    item.clone() * op2
+                    *item * op2
                 };
-                result = if part2 { result % mod_op } else { (result / 3) };
+                result = if part2 { result % mod_op } else { result / 3 };
                 let idx = if (result % monkeys[i].div_by) == 0 {
                     monkeys[i].if_true
                 } else {
@@ -148,29 +126,25 @@ fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> usize {
             monkeys[i].items.clear();
         }
     }
-    monkeys
+
+    let mut heap = monkeys
         .iter()
         .map(|x| x.inspect_cnt)
-        .collect::<BinaryHeap<_>>()
-        .drain()
-        .take(2)
-        .into_iter()
-        .fold(1, |accu, x| accu * x)
+        .collect::<BinaryHeap<_>>();
+    heap.pop().unwrap() * heap.pop().unwrap()
 }
 
-fn part1(monkeys: &mut Vec<Monkey>) -> usize {
+fn part1(monkeys: &mut Vec<Monkey>) -> u128 {
     solve(monkeys, 20, false)
 }
 
-fn part2(monkeys: &mut Vec<Monkey>) -> usize {
+fn part2(monkeys: &mut Vec<Monkey>) -> u128 {
     solve(monkeys, 10_000, true)
 }
 
 fn main() {
     let input = include_str!("../../../inputs/input_11.txt");
     let mut monkeys = parse(input);
-    let mut monkey1 = monkeys.clone();
-    println!("{:?}", monkeys);
-    println!("Part 1: {}", part1(&mut monkey1));
+    println!("Part 1: {}", part1(&mut monkeys.clone()));
     println!("Part 2: {}", part2(&mut monkeys));
 }
