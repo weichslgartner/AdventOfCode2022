@@ -1,9 +1,11 @@
+import copy
+import heapq
 from dataclasses import dataclass, field
+from functools import reduce
 from operator import add
 from typing import List
 
 from aoc import get_lines, extract_all_ints
-from pathlib import Path
 
 
 @dataclass
@@ -16,28 +18,22 @@ class Operation:
 @dataclass
 class Monkey:
     number: int
-    items: List[int] =  field(default_factory=list)
+    items: List[int] = field(default_factory=list)
     operation: Operation = Operation()
     div_by: int = 0
     if_true: int = 0
     if_false: int = 0
-    inspect_cnt : int = 0
+    inspect_cnt: int = 0
 
 
-def parse_input(lines):
-    # Monkey 1:
-    #   Starting items: 54, 65, 75, 74
-    #   Operation: new = old + 6
-    #   Test: divisible by 19
-    #     If true: throw to monkey 2
-    #     If false: throw to monkey 0
-    monkeys = {}
+def parse_input(lines: List[str]) -> List[Monkey]:
+    monkeys = []
+    new_monkey = None
     for line in lines:
-        #new_monkey : Monkey = None
         if "Monkey" in line:
             new_monkey = Monkey(number=extract_all_ints(line).pop())
         elif "Starting items" in line:
-            new_monkey.items = extract_all_ints(line)
+            new_monkey.items = [x for x in extract_all_ints(line)]
         elif "Operation" in line:
             tokens = line.split('=')[1].split()
             new_monkey.operation = Operation(*tokens)
@@ -47,44 +43,47 @@ def parse_input(lines):
             new_monkey.if_true = extract_all_ints(line).pop()
         elif "If false:" in line:
             new_monkey.if_false = extract_all_ints(line).pop()
-            monkeys[new_monkey.number] = new_monkey
-    print(monkeys)
+            monkeys.append(new_monkey)
     return monkeys
 
 
-def part_1(monkeys, rounds = 20):
+def solve(monkeys: List[Monkey], rounds: int = 10000, part2: bool = False) -> int:
+    mod_op = reduce(lambda accu, m: accu * m.div_by, monkeys, 1) if part2 else None
     for _ in range(rounds):
-        for key, monkey in monkeys.items():
+        for monkey in monkeys:
             while len(monkey.items) > 0:
                 item = monkey.items.pop(0)
-                op2 = item  if monkey.operation.operand_2 == 'old' else int(monkey.operation.operand_2)
+                op2 = item if monkey.operation.operand_2 == 'old' else int(monkey.operation.operand_2)
                 if monkey.operation.operator == '+':
                     item = item + op2
                 else:
                     item = item * op2
-                item //= 3
+                item = item % mod_op if part2 else item // 3
                 if (item % monkey.div_by) == 0:
                     monkeys[monkey.if_true].items.append(item)
                 else:
                     monkeys[monkey.if_false].items.append(item)
-                monkey.inspect_cnt +=1
+                monkey.inspect_cnt += 1
+    cnts = [-m.inspect_cnt for m in monkeys]
+    heapq.heapify(cnts)
+    return heapq.heappop(cnts) * heapq.heappop(cnts)
 
-    print(monkeys)
-    counts =  sorted([m.inspect_cnt for m in monkeys.values()],reverse=True)
-    return counts[0]*counts[1]
+
+def part_1(monkeys: List[Monkey]) -> int:
+    return solve(monkeys, 20, part2=False)
 
 
-def part_2(lines):
-    pass
+def part_2(monkeys: List[Monkey]) -> int:
+    return solve(monkeys, 10000, part2=True)
 
 
 def main():
     lines = get_lines("input_11.txt")
     monkeys = parse_input(lines)
-    print("Part 1:", part_1(monkeys))
-    print("Part 2:", part_2(lines))
+    print("Part 1:", part_1(copy.deepcopy(monkeys)))  # 113232
+    print("Part 2:", part_2(monkeys))  # 29703395016
 
 
 if __name__ == '__main__':
     main()
-    add(3,1)
+    add(3, 1)
