@@ -1,14 +1,14 @@
 use std::collections::BinaryHeap;
 #[derive(Debug, Clone, PartialEq, Copy)]
 enum Operand {
-    Value(u128),
+    Value(u64),
     Old,
 }
 impl std::str::FromStr for Operand {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Ok(val) = s.parse::<u128>() {
+        if let Ok(val) = s.parse::<u64>() {
             return Ok(Operand::Value(val));
         }
         Ok(Operand::Old)
@@ -26,12 +26,12 @@ struct Operation {
 #[derive(Debug, Clone)]
 struct Monkey {
     number: u32,
-    items: Vec<u128>,
+    items: Vec<u64>,
     operation: Operation,
-    div_by: u128,
+    div_by: u64,
     if_true: usize,
     if_false: usize,
-    inspect_cnt: u128,
+    inspect_cnt: u64,
 }
 
 impl Monkey {
@@ -96,11 +96,11 @@ fn parse(input: &str) -> Vec<Monkey> {
 
     monkeys
 }
-fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u128 {
-    let mod_op: u128 = monkeys.iter().map(|m| m.div_by).product();
+fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u64 {
+    let mod_op: u64 = monkeys.iter().map(|m| m.div_by).product();
     for _ in 0..rounds {
         for i in 0..monkeys.len() {
-            monkeys[i].inspect_cnt += monkeys[i].items.len() as u128;
+            monkeys[i].inspect_cnt += monkeys[i].items.len() as u64;
             let mut temp = vec![];
             for item in monkeys[i].items.iter() {
                 let mut op2 = *item;
@@ -134,11 +134,11 @@ fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u128 {
     heap.pop().unwrap() * heap.pop().unwrap()
 }
 
-fn part1(monkeys: &mut Vec<Monkey>) -> u128 {
+fn part1(monkeys: &mut Vec<Monkey>) -> u64 {
     solve(monkeys, 20, false)
 }
 
-fn part2(monkeys: &mut Vec<Monkey>) -> u128 {
+fn part2(monkeys: &mut Vec<Monkey>) -> u64 {
     solve(monkeys, 10_000, true)
 }
 
