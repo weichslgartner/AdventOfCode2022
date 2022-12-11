@@ -101,28 +101,15 @@ fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u64 {
     for _ in 0..rounds {
         for i in 0..monkeys.len() {
             monkeys[i].inspect_cnt += monkeys[i].items.len() as u64;
-            let mut temp = vec![];
-            for item in monkeys[i].items.iter() {
-                let mut op2 = *item;
-                if let Operand::Value(i) = monkeys[i].operation.operand_2 {
-                    op2 = i;
-                }
-                let mut result = if monkeys[i].operation.operator == '+' {
-                    *item + op2
-                } else {
-                    *item * op2
-                };
-                result = if part2 { result % mod_op } else { result / 3 };
-                let idx = if (result % monkeys[i].div_by) == 0 {
-                    monkeys[i].if_true
-                } else {
-                    monkeys[i].if_false
-                };
-                temp.push((idx, result));
-            }
-            temp.iter()
-                .for_each(|(idx, result)| monkeys[*idx].items.push(*result));
-
+            let to_move = monkeys[i]
+                .items
+                .iter()
+                .map(|item| {
+                    let result = calc_level(item, &monkeys, i, part2, mod_op);
+                    let idx = get_index(result, &monkeys, i);
+                    (idx, result)
+                }).collect::<Vec<_>>();
+            to_move.iter().for_each(|(idx, result)| monkeys[*idx].items.push(*result));
             monkeys[i].items.clear();
         }
     }
@@ -132,6 +119,29 @@ fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u64 {
         .map(|x| x.inspect_cnt)
         .collect::<BinaryHeap<_>>();
     heap.pop().unwrap() * heap.pop().unwrap()
+}
+
+fn get_index(result: u64, monkeys: &[Monkey], i: usize) -> usize {
+    let idx = if (result % monkeys[i].div_by) == 0 {
+        monkeys[i].if_true
+    } else {
+        monkeys[i].if_false
+    };
+    idx
+}
+
+fn calc_level(item: &u64, monkeys: &[Monkey], i: usize, part2: bool, mod_op: u64) -> u64 {
+    let mut op2 = *item;
+    if let Operand::Value(i) = monkeys[i].operation.operand_2 {
+        op2 = i;
+    }
+    let mut result = if monkeys[i].operation.operator == '+' {
+        *item + op2
+    } else {
+        *item * op2
+    };
+    result = if part2 { result % mod_op } else { result / 3 };
+    result
 }
 
 fn part1(monkeys: &mut Vec<Monkey>) -> u64 {
