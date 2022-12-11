@@ -1,11 +1,11 @@
 import copy
-import heapq
+import operator
 from dataclasses import dataclass, field
 from functools import reduce
 from operator import add
 from typing import List
 
-from aoc import get_lines, extract_all_ints
+from aoc import get_lines, extract_all_ints, input_as_str
 
 
 @dataclass
@@ -51,8 +51,8 @@ def solve(monkeys: List[Monkey], rounds: int = 10000, part2: bool = False) -> in
     mod_op = reduce(lambda accu, m: accu * m.div_by, monkeys, 1) if part2 else None
     for _ in range(rounds):
         for monkey in monkeys:
-            while len(monkey.items) > 0:
-                item = monkey.items.pop(0)
+            monkey.inspect_cnt += len(monkey.items)
+            for item in monkey.items:
                 op2 = item if monkey.operation.operand_2 == 'old' else int(monkey.operation.operand_2)
                 if monkey.operation.operator == '+':
                     item = item + op2
@@ -63,10 +63,8 @@ def solve(monkeys: List[Monkey], rounds: int = 10000, part2: bool = False) -> in
                     monkeys[monkey.if_true].items.append(item)
                 else:
                     monkeys[monkey.if_false].items.append(item)
-                monkey.inspect_cnt += 1
-    cnts = [-m.inspect_cnt for m in monkeys]
-    heapq.heapify(cnts)
-    return heapq.heappop(cnts) * heapq.heappop(cnts)
+            monkey.items = []
+    return operator.mul(*sorted(map(lambda m: m.inspect_cnt, monkeys), reverse=True)[:2])
 
 
 def part_1(monkeys: List[Monkey]) -> int:
