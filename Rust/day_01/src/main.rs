@@ -12,7 +12,7 @@ fn part1(input: &BinaryHeap<i32>) -> i32 {
 }
 
 fn part2(input: &mut BinaryHeap<i32>) -> i32 {
-    input.drain().take(3).sum()
+    (0..3).map(|_| input.pop().unwrap()).sum()
 }
 
 fn main() {
