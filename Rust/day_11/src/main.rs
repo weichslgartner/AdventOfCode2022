@@ -100,8 +100,7 @@ fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u64 {
                 .iter()
                 .map(|item| {
                     let result = calc_level(item, monkeys, i, part2, mod_op);
-                    let idx = get_index(result, monkeys, i);
-                    (idx, result)
+                    (get_index(result, monkeys, i), result)
                 })
                 .collect::<Vec<_>>();
             to_move
@@ -111,6 +110,10 @@ fn solve(monkeys: &mut Vec<Monkey>, rounds: usize, part2: bool) -> u64 {
         }
     }
 
+    calc_monkey_business(monkeys)
+}
+
+fn calc_monkey_business(monkeys: &[Monkey]) -> u64 {
     let mut heap = monkeys
         .iter()
         .map(|x| x.inspect_cnt)
