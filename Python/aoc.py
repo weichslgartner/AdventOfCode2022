@@ -38,7 +38,7 @@ def from_grid(p: Point, grid: List[List[int]]) -> int:
     return grid[p.y][p.x]
 
 
-def manhattan_distance(a: Point, b: Point):
+def manhattan_distance(a: Point, b: Point) -> int:
     return abs(a.x - b.x) + abs(a.y - b.y)
 
 
@@ -53,7 +53,6 @@ def input_as_str(file_name: str) -> str:
     file = Path(__file__).parents[1] / "inputs" / file_name
     with file.open('r') as f:
         return f.read().strip()
-    return ""
 
 
 def partition(predicate: Callable, iterable: Iterable) -> (Iterable, Iterable):
@@ -62,7 +61,7 @@ def partition(predicate: Callable, iterable: Iterable) -> (Iterable, Iterable):
 
 
 def take(n, iterable):
-    "Return first n items of the iterable as a list"
+    """Return first n items of the iterable as a list"""
     return list(islice(iterable, n))
 
 

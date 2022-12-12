@@ -22,9 +22,11 @@ def parse_input(lines: List[str]) -> Tuple[List[List[int]], Point, Point, Point]
 
 
 def a_star(grid: List[List[int]], start: Point, goal: Point, maxp: Point, is_part1: bool) -> int:
-    costs, f_costs, in_queue, queue = init_a_start(grid, goal, start, is_part1)
+    costs, in_queue, queue = init_a_star(grid, goal, start, is_part1)
+    print(len(queue))
     while len(queue) > 0:
         _, cur = heapq.heappop(queue)
+        print(_,cur)
         in_queue.remove(cur)
         if cur == goal:
             return costs[cur]
@@ -32,8 +34,7 @@ def a_star(grid: List[List[int]], start: Point, goal: Point, maxp: Point, is_par
             t_costs = costs[cur] + 1
             if t_costs < costs[n]:
                 costs[n] = t_costs
-                f_costs[n] = t_costs + manhattan_distance(n, goal)
-                heapq.heappush(queue, (f_costs[n], n))
+                heapq.heappush(queue, (t_costs + manhattan_distance(n, goal), n))
                 in_queue.add(n)
     return sys.maxsize
 
@@ -42,26 +43,23 @@ def is_valid_neighbor(grid: List[List[int]], in_queue: Set[Point], cur: Point, n
     return grid[neighbor.y][neighbor.x] <= grid[cur.y][cur.x] + 1 and neighbor not in in_queue
 
 
-def init_a_start(grid: List[List[int]], p_target: Point, start: Point, is_part_1: bool) -> \
-        Tuple[Dict[Point, int], Dict[Point, int], Set[Point], List[Tuple[int, Point]]]:
+def init_a_star(grid: List[List[int]], p_target: Point, start: Point, is_part_1: bool) -> \
+        Tuple[Dict[Point, int], Set[Point], List[Tuple[int, Point]]]:
     costs = defaultdict(lambda: sys.maxsize)
-    f_costs = defaultdict(lambda: sys.maxsize)
     in_queue = {start}
     queue = []
     costs[start] = 0
-    f_costs[start] = manhattan_distance(start, p_target)
     if is_part_1:
         queue.append((manhattan_distance(start, p_target), start))
-        return costs, f_costs, in_queue, queue
+        return costs, in_queue, queue
     for y, line in enumerate(grid):
         for x, c in enumerate(line):
             if c == ord('a'):
                 p = Point(x, y)
                 in_queue.add(p)
                 heapq.heappush(queue, (manhattan_distance(p, p_target), p))
-                f_costs[p] = manhattan_distance(p, p_target)
                 costs[p] = 0
-    return costs, f_costs, in_queue, queue
+    return costs, in_queue, queue
 
 
 def part_1(grid: List[List[int]], start: Point, goal: Point, maxp: Point) -> int:
@@ -75,7 +73,7 @@ def part_2(grid: List[List[int]], start: Point, goal: Point, maxp: Point) -> int
 def main():
     lines = get_lines("input_12.txt")
     grid, start, goal, maxp = parse_input(lines)
-    print("Part 1:", part_1(grid, start, goal, maxp))
+   # print("Part 1:", part_1(grid, start, goal, maxp))
     print("Part 2:", part_2(grid, start, goal, maxp))
 
 
