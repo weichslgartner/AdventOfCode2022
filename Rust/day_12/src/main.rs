@@ -70,6 +70,27 @@ fn parse(input: &str) -> (Vec<Vec<u32>>, Point, Point, Point) {
     )
 }
 
+fn neighbors(point: Point) -> [Point; 4] {
+    [
+        Point {
+            x: point.x - 1,
+            y: point.y,
+        },
+        Point {
+            x: point.x,
+            y: point.y - 1,
+        },
+        Point {
+            x: point.x + 1,
+            y: point.y,
+        },
+        Point {
+            x: point.x,
+            y: point.y + 1,
+        },
+    ]
+}
+
 fn is_in_grid(p: Point, p_max: Point) -> bool {
     (p.x >= 0) && (p.y >= 0) && (p.x < p_max.x) && (p.y < p_max.y)
 }
@@ -87,29 +108,13 @@ fn a_star(
         if point == *goal {
             return Some(costs[&point]);
         }
-        for n in [
-            Point {
-                x: point.x - 1,
-                y: point.y,
-            },
-            Point {
-                x: point.x,
-                y: point.y - 1,
-            },
-            Point {
-                x: point.x + 1,
-                y: point.y,
-            },
-            Point {
-                x: point.x,
-                y: point.y + 1,
-            },
-        ]
-        .iter()
-        .filter(|p| is_in_grid(**p, *maxp))
-        .filter(|p| {
-            grid[p.y as usize][p.x as usize] <= grid[point.y as usize][point.x as usize] + 1
-        }) {
+        for n in neighbors(point)
+            .iter()
+            .filter(|p| is_in_grid(**p, *maxp))
+            .filter(|p| {
+                grid[p.y as usize][p.x as usize] <= grid[point.y as usize][point.x as usize] + 1
+            })
+        {
             let t_costs = costs[&point] + 1;
             if t_costs < *costs.get(n).unwrap_or(&usize::MAX) {
                 costs.insert(*n, t_costs);
