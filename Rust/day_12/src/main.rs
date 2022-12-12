@@ -9,7 +9,9 @@ struct State {
 
 impl Ord for State {
     fn cmp(&self, other: &Self) -> Ordering {
-        other.cost.cmp(&self.cost).then_with(|| other.point.x.cmp(&self.point.x))
+        other
+            .cost
+            .cmp(&self.cost)
     }
 }
 
@@ -97,14 +99,16 @@ fn a_star(grid: &[Vec<u32>], start: &Point, goal: &Point, maxp: &Point, is_part_
         for n in get_neighbours_4(point, *maxp).iter().filter(|p| {
             grid[p.y as usize][p.x as usize] <= grid[point.y as usize][point.x as usize] + 1
         }) {
-            let t_costs = costs.get(&point).unwrap() + 1;
-            if t_costs < *costs.get(n).unwrap_or(&usize::MAX) && !in_queue.contains(n) {
+            let t_costs = costs[&point] + 1;
+            if t_costs < *costs.get(n).unwrap_or(&usize::MAX) {
                 costs.insert(*n, t_costs);
-                queue.push(State {
-                    cost: t_costs + (manhattan_distance(*n, *goal) as usize),
-                    point: *n,
-                });
-                in_queue.insert(*n);
+                if !in_queue.contains(n) {
+                    queue.push(State {
+                        cost: t_costs + (manhattan_distance(*n, *goal) as usize),
+                        point: *n,
+                    });
+                    in_queue.insert(*n);
+                }
             }
         }
     }

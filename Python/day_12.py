@@ -23,24 +23,23 @@ def parse_input(lines: List[str]) -> Tuple[List[List[int]], Point, Point, Point]
 
 def a_star(grid: List[List[int]], start: Point, goal: Point, maxp: Point, is_part1: bool) -> int:
     costs, in_queue, queue = init_a_star(grid, goal, start, is_part1)
-    print(len(queue))
     while len(queue) > 0:
         _, cur = heapq.heappop(queue)
-        print(_,cur)
         in_queue.remove(cur)
         if cur == goal:
             return costs[cur]
-        for n in filter(lambda p: is_valid_neighbor(grid, in_queue, cur=cur, neighbor=p), get_neighbours_4(cur, maxp)):
+        for n in filter(lambda p: is_valid_neighbor(grid, cur=cur, neighbor=p), get_neighbours_4(cur, maxp)):
             t_costs = costs[cur] + 1
             if t_costs < costs[n]:
                 costs[n] = t_costs
-                heapq.heappush(queue, (t_costs + manhattan_distance(n, goal), n))
-                in_queue.add(n)
+                if n not in in_queue:
+                    heapq.heappush(queue, (t_costs + manhattan_distance(n, goal), n))
+                    in_queue.add(n)
     return sys.maxsize
 
 
-def is_valid_neighbor(grid: List[List[int]], in_queue: Set[Point], cur: Point, neighbor: Point) -> bool:
-    return grid[neighbor.y][neighbor.x] <= grid[cur.y][cur.x] + 1 and neighbor not in in_queue
+def is_valid_neighbor(grid: List[List[int]], cur: Point, neighbor: Point) -> bool:
+    return grid[neighbor.y][neighbor.x] <= grid[cur.y][cur.x] + 1
 
 
 def init_a_star(grid: List[List[int]], p_target: Point, start: Point, is_part_1: bool) -> \
@@ -73,7 +72,7 @@ def part_2(grid: List[List[int]], start: Point, goal: Point, maxp: Point) -> int
 def main():
     lines = get_lines("input_12.txt")
     grid, start, goal, maxp = parse_input(lines)
-   # print("Part 1:", part_1(grid, start, goal, maxp))
+    print("Part 1:", part_1(grid, start, goal, maxp))
     print("Part 2:", part_2(grid, start, goal, maxp))
 
 
