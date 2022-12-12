@@ -137,34 +137,37 @@ fn init_a_star(
     start: &Point,
     is_part_1: bool,
 ) -> (HashMap<Point, usize>, HashSet<Point>, BinaryHeap<State>) {
-    let mut costs = HashMap::<Point, usize>::new();
-    let mut in_queue = HashSet::<Point>::new();
-    let mut queue = BinaryHeap::<State>::new();
-    costs.insert(*start, 0);
     if is_part_1 {
-        queue.push(State {
-            cost: manhattan_distance(*start, *goal) as usize,
-            point: *start,
-        });
-        return (costs, in_queue, queue);
+        return (
+            HashMap::<Point, usize>::from([(*start, 0)]),
+            HashSet::<Point>::from([*start]),
+            BinaryHeap::<State>::from([State {
+                cost: manhattan_distance(*start, *goal) as usize,
+                point: *start,
+            }]),
+        );
     }
-    for (y, line) in grid.iter().enumerate() {
-        for (x, c) in line.iter().enumerate() {
-            if *c == 'a' as u32 {
-                let p = Point {
-                    x: x as i32,
-                    y: y as i32,
-                };
-                in_queue.insert(p);
-                queue.push(State {
-                    cost: manhattan_distance(p, *goal) as usize,
-                    point: p,
-                });
-                costs.insert(p, 0);
-            }
-        }
-    }
-    (costs, in_queue, queue)
+
+    let start_points = grid.iter().enumerate().flat_map(|(y, line)| {
+        line.iter()
+            .enumerate()
+            .filter(|(_, c)| (**c == 'a' as u32))
+            .map(move |(x, _)| Point {
+                x: x as i32,
+                y: y as i32,
+            })
+    });
+
+    (
+        start_points.clone().map(|p| (p, 0)).collect(),
+        start_points.clone().collect(),
+        start_points
+            .map(|p| State {
+                cost: manhattan_distance(p, *goal) as usize,
+                point: p,
+            })
+            .collect(),
+    )
 }
 
 fn part1(grid: &[Vec<u32>], start: &Point, goal: &Point, maxp: &Point) -> Option<usize> {
