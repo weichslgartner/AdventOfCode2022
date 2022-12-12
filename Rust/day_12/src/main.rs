@@ -9,9 +9,7 @@ struct State {
 
 impl Ord for State {
     fn cmp(&self, other: &Self) -> Ordering {
-        other
-            .cost
-            .cmp(&self.cost)
+        other.cost.cmp(&self.cost)
     }
 }
 
@@ -89,12 +87,18 @@ fn get_neighbours_4(p: Point, maxp: Point) -> Vec<Point> {
     .collect()
 }
 
-fn a_star(grid: &[Vec<u32>], start: &Point, goal: &Point, maxp: &Point, is_part_1: bool) -> usize {
+fn a_star(
+    grid: &[Vec<u32>],
+    start: &Point,
+    goal: &Point,
+    maxp: &Point,
+    is_part_1: bool,
+) -> Option<usize> {
     let (mut costs, mut in_queue, mut queue) = init_a_star(grid, goal, start, is_part_1);
     while let Some(State { cost: _, point }) = queue.pop() {
         in_queue.remove(&point);
         if point == *goal {
-            return costs[&point];
+            return Some(costs[&point]);
         }
         for n in get_neighbours_4(point, *maxp).iter().filter(|p| {
             grid[p.y as usize][p.x as usize] <= grid[point.y as usize][point.x as usize] + 1
@@ -112,7 +116,7 @@ fn a_star(grid: &[Vec<u32>], start: &Point, goal: &Point, maxp: &Point, is_part_
             }
         }
     }
-    0
+    None
 }
 
 fn init_a_star(
@@ -151,17 +155,17 @@ fn init_a_star(
     (costs, in_queue, queue)
 }
 
-fn part1(grid: &[Vec<u32>], start: &Point, goal: &Point, maxp: &Point) -> usize {
+fn part1(grid: &[Vec<u32>], start: &Point, goal: &Point, maxp: &Point) -> Option<usize> {
     a_star(grid, start, goal, maxp, true)
 }
 
-fn part2(grid: &[Vec<u32>], start: &Point, goal: &Point, maxp: &Point) -> usize {
+fn part2(grid: &[Vec<u32>], start: &Point, goal: &Point, maxp: &Point) -> Option<usize> {
     a_star(grid, start, goal, maxp, false)
 }
 
 fn main() {
     let input = include_str!("../../../inputs/input_12.txt");
     let (grid, start, target, max_p) = parse(input);
-    println!("Part 1: {}", part1(&grid, &start, &target, &max_p));
-    println!("Part 2: {}", part2(&grid, &start, &target, &max_p));
+    println!("Part 1: {}", part1(&grid, &start, &target, &max_p).unwrap());
+    println!("Part 2: {}", part2(&grid, &start, &target, &max_p).unwrap());
 }
