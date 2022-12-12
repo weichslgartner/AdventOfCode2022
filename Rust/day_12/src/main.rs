@@ -74,19 +74,6 @@ fn is_in_grid(p: Point, p_max: Point) -> bool {
     (p.x >= 0) && (p.y >= 0) && (p.x < p_max.x) && (p.y < p_max.y)
 }
 
-fn get_neighbours_4(p: Point, maxp: Point) -> Vec<Point> {
-    [
-        Point { x: p.x - 1, y: p.y },
-        Point { x: p.x, y: p.y - 1 },
-        Point { x: p.x + 1, y: p.y },
-        Point { x: p.x, y: p.y + 1 },
-    ]
-    .iter()
-    .filter(|p| is_in_grid(**p, maxp))
-    .copied()
-    .collect()
-}
-
 fn a_star(
     grid: &[Vec<u32>],
     start: &Point,
@@ -100,7 +87,27 @@ fn a_star(
         if point == *goal {
             return Some(costs[&point]);
         }
-        for n in get_neighbours_4(point, *maxp).iter().filter(|p| {
+        for n in [
+            Point {
+                x: point.x - 1,
+                y: point.y,
+            },
+            Point {
+                x: point.x,
+                y: point.y - 1,
+            },
+            Point {
+                x: point.x + 1,
+                y: point.y,
+            },
+            Point {
+                x: point.x,
+                y: point.y + 1,
+            },
+        ]
+        .iter()
+        .filter(|p| is_in_grid(**p, *maxp))
+        .filter(|p| {
             grid[p.y as usize][p.x as usize] <= grid[point.y as usize][point.x as usize] + 1
         }) {
             let t_costs = costs[&point] + 1;
