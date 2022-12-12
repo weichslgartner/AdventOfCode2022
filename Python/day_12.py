@@ -28,17 +28,18 @@ def a_star(grid: List[List[int]], start: Point, goal: Point, maxp: Point, is_par
         in_queue.remove(cur)
         if cur == goal:
             return costs[cur]
-        for n in get_neighbours_4(cur, maxp):
-            if grid[n.y][n.x] > grid[cur.y][cur.x] + 1:
-                continue
+        for n in filter(lambda p: is_valid_neighbor(grid, in_queue, cur=cur, neighbor=p), get_neighbours_4(cur, maxp)):
             t_costs = costs[cur] + 1
             if t_costs < costs[n]:
                 costs[n] = t_costs
                 f_costs[n] = t_costs + manhattan_distance(n, goal)
-                if n not in in_queue:
-                    heapq.heappush(queue, (f_costs[n], n))
-                    in_queue.add(n)
+                heapq.heappush(queue, (f_costs[n], n))
+                in_queue.add(n)
     return sys.maxsize
+
+
+def is_valid_neighbor(grid: List[List[int]], in_queue: Set[Point], cur: Point, neighbor: Point) -> bool:
+    return grid[neighbor.y][neighbor.x] <= grid[cur.y][cur.x] + 1 and neighbor not in in_queue
 
 
 def init_a_start(grid: List[List[int]], p_target: Point, start: Point, is_part_1: bool) -> \
