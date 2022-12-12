@@ -9,7 +9,11 @@ struct State {
 
 impl Ord for State {
     fn cmp(&self, other: &Self) -> Ordering {
-        other.cost.cmp(&self.cost)
+        other
+            .cost
+            .cmp(&self.cost)
+            .then_with(|| other.point.y.cmp(&self.point.y))
+            .then_with(|| other.point.x.cmp(&self.point.x))
     }
 }
 
@@ -43,23 +47,22 @@ fn parse(input: &str) -> (Vec<Vec<u32>>, Point, Point, Point) {
             .map(|(y, line)| {
                 line.chars()
                     .enumerate()
-                    .map(|(x, c)| {
-                        if c == 'S' {
+                    .map(|(x, c)| match c {
+                        'S' => {
                             start = Point {
                                 x: x as i32,
                                 y: y as i32,
                             };
-                            return 'a' as u32;
+                            'a' as u32
                         }
-                        if c == 'E' {
+                        'E' => {
                             target = Point {
                                 x: x as i32,
                                 y: y as i32,
                             };
-
-                            return 'z' as u32;
+                            'z' as u32
                         }
-                        c as u32
+                        _ => c as u32,
                     })
                     .collect()
             })
