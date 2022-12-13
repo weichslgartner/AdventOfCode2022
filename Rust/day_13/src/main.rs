@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, collections::VecDeque, num};
+use std::{cmp::Ordering, collections::VecDeque};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 enum Packet {
@@ -68,16 +68,13 @@ fn tokenize(input: &str) -> VecDeque<String> {
 
 fn parse_packet(tokens: &mut VecDeque<String>) -> Packet {
     let mut v = vec![];
-
     while let Some(token) = tokens.pop_front() {
         match token.as_str() {
             "[" => v.push(parse_packet(tokens)),
             "]" => break,
-
             x => v.push(Packet::Integer(x.parse().unwrap())),
         }
     }
-
     Packet::List(v)
 }
 
@@ -93,23 +90,26 @@ fn parse(input: &str) -> Vec<Vec<Packet>> {
         .collect()
 }
 
-fn part1(pairs: &Vec<Vec<Packet>>) -> usize {
+fn part1(pairs: &[Vec<Packet>]) -> usize {
     pairs
         .iter()
         .enumerate()
         .map(|(i, x)| (i + 1, x[0] < x[1]))
-        .filter(|(i, x)| *x)
-        .map(|(i, x)| i)
+        .filter(|(_i, x)| *x)
+        .map(|(i, _x)| i)
         .sum()
 }
 
 fn part2(pairs: Vec<Vec<Packet>>, divider_packets: Vec<Packet>) -> usize {
-     let mut packets : Vec<Packet> = pairs.into_iter().flatten().collect::<Vec<_>>();
-     divider_packets.iter().for_each(|p| packets.push(p.clone()));
-     packets.sort();
-     packets.iter().enumerate().filter(|(i, packet)| divider_packets.contains(packet) ).map(|(i,p)| i+1).product()
-
-    
+    let mut packets: Vec<Packet> = pairs.into_iter().flatten().collect::<Vec<_>>();
+    divider_packets.iter().for_each(|p| packets.push(p.clone()));
+    packets.sort();
+    packets
+        .iter()
+        .enumerate()
+        .filter(|(_i, packet)| divider_packets.contains(packet))
+        .map(|(i, _p)| i + 1)
+        .product()
 }
 
 fn main() {
