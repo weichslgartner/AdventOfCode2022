@@ -2,7 +2,7 @@ use std::{cmp::Ordering, collections::VecDeque};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 enum Packet {
-    Integer(i64),
+    Integer(i32),
     List(Vec<Packet>),
 }
 
@@ -95,20 +95,20 @@ fn part1(pairs: &[Vec<Packet>]) -> usize {
         .iter()
         .enumerate()
         .map(|(i, x)| (i + 1, x[0] < x[1]))
-        .filter(|(_i, x)| *x)
-        .map(|(i, _x)| i)
+        .filter(|(_, x)| *x)
+        .map(|(i, _)| i)
         .sum()
 }
 
 fn part2(pairs: Vec<Vec<Packet>>, divider_packets: Vec<Packet>) -> usize {
-    let mut packets: Vec<Packet> = pairs.into_iter().flatten().collect::<Vec<_>>();
+    let mut packets: Vec<Packet> = pairs.into_iter().flatten().collect();
     divider_packets.iter().for_each(|p| packets.push(p.clone()));
     packets.sort();
     packets
         .iter()
         .enumerate()
-        .filter(|(_i, packet)| divider_packets.contains(packet))
-        .map(|(i, _p)| i + 1)
+        .filter(|(_, packet)| divider_packets.contains(packet))
+        .map(|(i, _)| i + 1)
         .product()
 }
 
