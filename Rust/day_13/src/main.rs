@@ -46,16 +46,10 @@ fn tokenize(input: &str) -> VecDeque<String> {
                 tokens.push_back(String::from("["));
             }
             ',' => {
-                if !number.is_empty() {
-                    tokens.push_back(number.clone());
-                    number = String::from("");
-                }
+                push_number(&mut number, &mut tokens);
             }
             ']' => {
-                if !number.is_empty() {
-                    tokens.push_back(number.clone());
-                    number = String::from("");
-                }
+                push_number(&mut number, &mut tokens);
                 tokens.push_back(String::from("]"));
             }
             _ => number.push(c),
@@ -64,6 +58,13 @@ fn tokenize(input: &str) -> VecDeque<String> {
     tokens.pop_front();
     tokens.pop_back();
     tokens
+}
+
+fn push_number(number: &mut String, tokens: &mut VecDeque<String>) {
+    if !number.is_empty() {
+        tokens.push_back(number.clone());
+        *number = String::from("");
+    }
 }
 
 fn parse_packet(tokens: &mut VecDeque<String>) -> Packet {
@@ -100,9 +101,9 @@ fn part1(pairs: &[Vec<Packet>]) -> usize {
         .sum()
 }
 
-fn part2(pairs: Vec<Vec<Packet>>, divider_packets: Vec<Packet>) -> usize {
-    let mut packets: Vec<Packet> = pairs.into_iter().flatten().collect();
-    divider_packets.iter().for_each(|p| packets.push(p.clone()));
+fn part2(pairs: &[Vec<Packet>], divider_packets: &[Packet]) -> usize {
+    let mut packets = pairs.iter().flatten().collect::<Vec<_>>();
+    divider_packets.iter().for_each(|p| packets.push(p));
     packets.sort();
     packets
         .iter()
@@ -115,7 +116,10 @@ fn part2(pairs: Vec<Vec<Packet>>, divider_packets: Vec<Packet>) -> usize {
 fn main() {
     let input = include_str!("../../../inputs/input_13.txt");
     let pairs = parse(input);
-    let divider = parse("[[2]]\n[[6]]").into_iter().flatten().collect();
+    let divider = parse("[[2]]\n[[6]]")
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>();
     println!("Part 1: {}", part1(&pairs));
-    println!("Part 2: {}", part2(pairs, divider));
+    println!("Part 2: {}", part2(&pairs, &divider));
 }
