@@ -58,10 +58,8 @@ def compare(a: Union[int, List], b: Union[int, List]) -> int:
     if isinstance(a, list) and isinstance(b, list):
         for new_a, new_b in zip_longest(a, b):
             res = compare(new_a, new_b)
-            if res == Order.WRONG.value:
-                return Order.WRONG.value
-            if res == Order.RIGHT.value:
-                return Order.RIGHT.value
+            if res in [Order.WRONG.value, Order.RIGHT.value]:
+                return res
         return Order.CONTINUE.value
     if a < b:
         return Order.RIGHT.value
@@ -88,9 +86,9 @@ def part_2(pairs: List, divider_packets: List) -> int:
 
 def main():
     lines = input_as_str("input_13.txt")
-    lists = parse_input(lines)
-    print("Part 1:", part_1(lists))
-    print("Part 2:", part_2(lists, divider_packets=[[[2]], [[6]]]))
+    pairs = parse_input(lines)
+    print("Part 1:", part_1(pairs))
+    print("Part 2:", part_2(pairs, divider_packets=[[[2]], [[6]]]))
 
 
 if __name__ == '__main__':
