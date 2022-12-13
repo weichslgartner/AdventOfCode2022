@@ -1,17 +1,18 @@
 from enum import Enum
+from functools import cmp_to_key, reduce
+from typing import Union, List
 
-from aoc import get_lines, input_as_str
-from pathlib import Path
-from itertools import zip_longest
+from aoc import input_as_str
+from itertools import zip_longest, chain
 
 
 class Order(Enum):
-    WRONG = 0
+    WRONG = -1
     RIGHT = 1
-    CONTINUE = 2
+    CONTINUE = 0
 
 
-def parse_line(line):
+def parse_line(line: str) -> List[List]:
     lists = []
     stack = []
     cur_list = None
@@ -41,25 +42,22 @@ def parse_line(line):
             number += c
     return lists
 
-def parse_line_eval(line):
-    return eval(line)
 
-def parse_input(lines):
+def parse_input(lines: str) -> List:
     lists = []
     for pairs in lines.split("\n\n"):
         pair = []
         for line in pairs.splitlines():
-            #pair.append(parse_line(line))
-            pair.append(parse_line_eval(line))
+            pair.append(parse_line(line))
         lists.append(pair)
     return lists
 
 
-def compare(a, b):
+def compare(a: Union[int, List], b: Union[int, List]) -> int:
     if a is None:
-        return Order.RIGHT
+        return Order.RIGHT.value
     if b is None:
-        return Order.WRONG
+        return Order.WRONG.value
     if isinstance(a, list) and not isinstance(b, list):
         return compare(a, [b])
     if not isinstance(a, list) and isinstance(b, list):
@@ -67,37 +65,38 @@ def compare(a, b):
     if isinstance(a, list) and isinstance(b, list):
         for new_a, new_b in zip_longest(a, b):
             res = compare(new_a, new_b)
-            if res == Order.WRONG:
-                return Order.WRONG
-            if res == Order.RIGHT:
-                return Order.RIGHT
+            if res == Order.WRONG.value:
+                return Order.WRONG.value
+            if res == Order.RIGHT.value:
+                return Order.RIGHT.value
+        return Order.CONTINUE.value
     if a < b:
-        return Order.RIGHT
+        return Order.RIGHT.value
     if a > b:
-        return Order.WRONG
-    return Order.CONTINUE
+        return Order.WRONG.value
+    return Order.CONTINUE.value
 
 
-def part_1(pairs):
-    sum = 0
-    for i, pair in enumerate(pairs):
-        if compare(pair[0], pair[1]) == Order.RIGHT:
-            print(i + 1, "True")
-            sum += (i + 1)
-    print(len(pairs))
-    return sum
+def part_1(pairs: List) -> int:
+    return sum(map(lambda x: x[0] + 1, filter(lambda x: x[1] == Order.RIGHT.value,
+                                              map(lambda x: (x[0], compare(*x[1])), enumerate(pairs)))))
 
 
-def part_2(lines):
-    pass
+def part_2(pairs: List, divider_packets: List) -> int:
+    flat_list = list(chain.from_iterable(pairs))
+    flat_list += divider_packets
+    return reduce(lambda accu, x: accu * (x[0] + 1), filter(lambda x: x[1] in divider_packets,
+                                                            enumerate(
+                                                                sorted(flat_list, key=cmp_to_key(compare),
+                                                                       reverse=True))),
+                  1)
 
 
 def main():
     lines = input_as_str("input_13.txt")
-
     lists = parse_input(lines)
-    print("Part 1:", part_1(lists))  # 4251 too tlow too high 11325 wrong 5326
-    print("Part 2:", part_2(lines))
+    print("Part 1:", part_1(lists))
+    print("Part 2:", part_2(lists, divider_packets=[[[2]], [[6]]]))
 
 
 if __name__ == '__main__':
