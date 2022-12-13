@@ -29,10 +29,8 @@ def parse_line(line: str) -> List[List]:
         elif c == ']':
             number = maybe_append_number(cur_list, number)
             if len(stack) > 0:
-                #stack[-1].append(cur_list)
-                new_cur_list = stack.pop()
-                new_cur_list.append(cur_list)
-                cur_list = new_cur_list
+                stack[-1].append(cur_list)
+                cur_list = stack.pop()
         else:
             number += c
     return lists
