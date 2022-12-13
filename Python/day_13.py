@@ -20,21 +20,14 @@ def parse_line(line: str) -> List[List]:
     for c in line:
         if c == '[':
             if cur_list is not None:
-                if len(stack) > 0:
-                    stack.append(cur_list)
-                else:
-                    stack.append(cur_list)
+                stack.append(cur_list)
                 cur_list = []
             else:
                 cur_list = lists
         elif c == ',':
-            if len(number) > 0:
-                cur_list.append(int(number))
-                number = ""
+            number = maybe_append_number(cur_list, number)
         elif c == ']':
-            if len(number) > 0:
-                cur_list.append(int(number))
-                number = ""
+            number = maybe_append_number(cur_list, number)
             if len(stack) > 0:
                 stack[-1].append(cur_list)
                 cur_list = stack.pop()
@@ -43,14 +36,14 @@ def parse_line(line: str) -> List[List]:
     return lists
 
 
+def maybe_append_number(cur_list: List, number: str) -> str:
+    if len(number) > 0:
+        cur_list.append(int(number))
+    return ""
+
+
 def parse_input(lines: str) -> List:
-    lists = []
-    for pairs in lines.split("\n\n"):
-        pair = []
-        for line in pairs.splitlines():
-            pair.append(parse_line(line))
-        lists.append(pair)
-    return lists
+    return [[parse_line(line) for line in pairs.splitlines()] for pairs in lines.split("\n\n")]
 
 
 def compare(a: Union[int, List], b: Union[int, List]) -> int:
@@ -78,17 +71,18 @@ def compare(a: Union[int, List], b: Union[int, List]) -> int:
 
 
 def part_1(pairs: List) -> int:
-    return sum(map(lambda x: x[0] + 1, filter(lambda x: x[1] == Order.RIGHT.value,
-                                              map(lambda x: (x[0], compare(*x[1])), enumerate(pairs)))))
+    return sum(map(lambda x: x[0] + 1,
+                   filter(lambda x: x[1] == Order.RIGHT.value,
+                          map(lambda x: (x[0], compare(*x[1])),
+                              enumerate(pairs)))))
 
 
 def part_2(pairs: List, divider_packets: List) -> int:
-    flat_list = list(chain.from_iterable(pairs))
-    flat_list += divider_packets
-    return reduce(lambda accu, x: accu * (x[0] + 1), filter(lambda x: x[1] in divider_packets,
-                                                            enumerate(
-                                                                sorted(flat_list, key=cmp_to_key(compare),
-                                                                       reverse=True))),
+    return reduce(lambda accu, x: accu * (x[0] + 1),
+                  filter(lambda x: x[1] in divider_packets,
+                         enumerate(
+                             sorted(list(chain.from_iterable(pairs)) + divider_packets,
+                                    key=cmp_to_key(compare), reverse=True))),
                   1)
 
 
