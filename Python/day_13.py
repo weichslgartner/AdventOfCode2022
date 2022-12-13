@@ -29,8 +29,10 @@ def parse_line(line: str) -> List[List]:
         elif c == ']':
             number = maybe_append_number(cur_list, number)
             if len(stack) > 0:
-                stack[-1].append(cur_list)
-                cur_list = stack.pop()
+                #stack[-1].append(cur_list)
+                new_cur_list = stack.pop()
+                new_cur_list.append(cur_list)
+                cur_list = new_cur_list
         else:
             number += c
     return lists
@@ -69,18 +71,18 @@ def compare(a: Union[int, List], b: Union[int, List]) -> int:
 
 
 def part_1(pairs: List) -> int:
-    return sum(map(lambda x: x[0] + 1,
+    return sum(map(lambda x: x[0],
                    filter(lambda x: x[1] == Order.RIGHT.value,
                           map(lambda x: (x[0], compare(*x[1])),
-                              enumerate(pairs)))))
+                              enumerate(pairs, start=1)))))
 
 
 def part_2(pairs: List, divider_packets: List) -> int:
-    return reduce(lambda accu, x: accu * (x[0] + 1),
+    return reduce(lambda accu, x: accu * x[0],
                   filter(lambda x: x[1] in divider_packets,
                          enumerate(
                              sorted(list(chain.from_iterable(pairs)) + divider_packets,
-                                    key=cmp_to_key(compare), reverse=True))),
+                                    key=cmp_to_key(compare), reverse=True), start=1)),
                   1)
 
 
