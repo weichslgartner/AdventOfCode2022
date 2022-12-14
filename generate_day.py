@@ -22,7 +22,6 @@ year = 2022
 
 def python_stub(day: int) -> str:
     return f"""from aoc import get_lines
-from pathlib import Path
 
 
 def parse_input(lines):
