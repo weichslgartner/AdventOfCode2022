@@ -1,20 +1,19 @@
-from aoc import *
+import itertools
+from typing import List, Tuple, Set
+
+from aoc import Point, chunk, extract_all_ints, get_lines
+
+START_POINT = Point(500, 0)
 
 
-def parse_input(lines):
-    points = []
-    maxy = 0
-    for line in lines:
-        cur = []
-        for c in chunk(extract_all_ints(line), size=2):
-            cur.append(Point(int(c[0]), int(c[1])))
-            maxy = max(maxy, c[1])
-        points.append(cur)
-    return points, maxy
+def parse_input(lines: List[str]) -> Tuple[List[List[Point]], int]:
+    points = [[Point(*c) for c in chunk(extract_all_ints(line), size=2)] for line in lines]
+    maxy = max(itertools.chain.from_iterable(points), key=lambda p: p.y)
+    return points, maxy.y
 
 
-def enter_sand(rocks, sands, maxy, is_part1):
-    sand_p = Point(500, 0)
+def enter_sand(rocks: Set[Point], sands: Set[Point], maxy: int, is_part1: bool) -> bool:
+    sand_p = START_POINT
     while True:
         if sand_p.y > maxy:
             if is_part1:
@@ -24,21 +23,25 @@ def enter_sand(rocks, sands, maxy, is_part1):
         down = Point(sand_p.x, sand_p.y + 1)
         down_left = Point(sand_p.x - 1, sand_p.y + 1)
         down_right = Point(sand_p.x + 1, sand_p.y + 1)
-        if down not in rocks and down not in sands:
+        if is_free(down, rocks, sands):
             sand_p = down
-        elif down_left not in rocks and down_left not in sands:
+        elif is_free(down_left, rocks, sands):
             sand_p = down_left
-        elif down_right not in rocks and down_right not in sands:
+        elif is_free(down_right, rocks, sands):
             sand_p = down_right
         else:
             break
     sands.add(sand_p)
-    if sand_p == Point(500, 0):
+    if sand_p == START_POINT:
         return False
     return True
 
 
-def add_rocks(lines):
+def is_free(pos: Point, rocks: Set[Point], sands: Set[Point]) -> bool:
+    return pos not in rocks and pos not in sands
+
+
+def add_rocks(lines: List[List[Point]]) -> Set[Point]:
     rocks = set()
     for line in lines:
         for p1, p2 in zip(line, line[1:]):
@@ -49,28 +52,14 @@ def add_rocks(lines):
     return rocks
 
 
-def print_grid(rocks, sands):
-    for y in range(13):
-        for x in range(480, 520):
-            p = Point(x, y)
-            if p in rocks:
-                print('#', end="")
-            elif p in sands:
-                print('o', end="")
-
-            else:
-                print('.', end="")
-        print()
-
-
-def part_1(rocks, maxy):
+def part_1(rocks: Set[Point], maxy: int) -> int:
     sands = set()
     while enter_sand(rocks, sands, maxy, True):
         pass
     return len(sands)
 
 
-def part_2(rocks, maxy):
+def part_2(rocks: Set[Point], maxy: int) -> int:
     sands = set()
     while enter_sand(rocks, sands, maxy, False):
         pass
