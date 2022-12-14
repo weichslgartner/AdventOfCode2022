@@ -6,14 +6,14 @@ from aoc import Point, chunk, extract_all_ints, get_lines
 START_POINT = Point(500, 0)
 
 
-def parse_input(lines: List[str]) -> Tuple[List[List[Point]], int]:
+def parse_input(lines: List[str]) -> Tuple[Set[Point], int]:
     points = [[Point(*c) for c in chunk(extract_all_ints(line), size=2)] for line in lines]
     maxy = max(itertools.chain.from_iterable(points), key=lambda p: p.y)
-    return points, maxy.y
+    return add_rocks(points), maxy.y
 
 
-def enter_sand(rocks: Set[Point], sands: Set[Point], maxy: int, is_part1: bool) -> bool:
-    sand_p = START_POINT
+def enter_sand(rocks: Set[Point], sands: Set[Point], maxy: int, last_point: List[Point], is_part1: bool) -> bool:
+    sand_p = last_point[0] if last_point[0] not in sands else START_POINT
     while True:
         if sand_p.y > maxy:
             if is_part1:
@@ -24,10 +24,13 @@ def enter_sand(rocks: Set[Point], sands: Set[Point], maxy: int, is_part1: bool) 
         down_left = Point(sand_p.x - 1, sand_p.y + 1)
         down_right = Point(sand_p.x + 1, sand_p.y + 1)
         if is_free(down, rocks, sands):
+            last_point[0] = sand_p
             sand_p = down
         elif is_free(down_left, rocks, sands):
+            last_point[0] = sand_p
             sand_p = down_left
         elif is_free(down_right, rocks, sands):
+            last_point[0] = sand_p
             sand_p = down_right
         else:
             break
@@ -54,22 +57,23 @@ def add_rocks(lines: List[List[Point]]) -> Set[Point]:
 
 def part_1(rocks: Set[Point], maxy: int) -> int:
     sands = set()
-    while enter_sand(rocks, sands, maxy, True):
+    last_point = [START_POINT]
+    while enter_sand(rocks, sands, maxy, last_point, True):
         pass
     return len(sands)
 
 
 def part_2(rocks: Set[Point], maxy: int) -> int:
     sands = set()
-    while enter_sand(rocks, sands, maxy, False):
+    last_point = [START_POINT]
+    while enter_sand(rocks, sands, maxy, last_point, False):
         pass
     return len(sands)
 
 
 def main():
     lines = get_lines("input_14.txt")
-    points, maxy = parse_input(lines)
-    rocks = add_rocks(points)
+    rocks, maxy = parse_input(lines)
     print("Part 1:", part_1(rocks, maxy))
     print("Part 2:", part_2(rocks, maxy))
 
