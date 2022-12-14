@@ -1,7 +1,7 @@
 from collections import namedtuple
 from itertools import filterfalse, tee, islice
 from pathlib import Path
-from typing import List, Callable, Iterable, Iterator
+from typing import List, Callable, Iterable, Iterator, Any
 import re
 
 
@@ -63,6 +63,11 @@ def partition(predicate: Callable, iterable: Iterable) -> (Iterable, Iterable):
 def take(n, iterable):
     """Return first n items of the iterable as a list"""
     return list(islice(iterable, n))
+
+
+def chunk(lines: List[Any], size=3) -> List[Any]:
+    for i in range(0, len(lines), size):
+        yield lines[i:i + size]
 
 
 def line_to_int(line: str, split_char=",") -> List[int]:
