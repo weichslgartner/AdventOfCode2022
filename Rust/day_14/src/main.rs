@@ -37,14 +37,14 @@ fn parse(input: &str) -> (i32, HashSet<Point>) {
 fn add_rocks(points: Vec<Vec<Point>>) -> HashSet<Point> {
     let mut rocks = HashSet::new();
     for line in points.iter() {
-        for (p1, p2) in line.iter().tuple_windows() {
-            for x in (p1.x).min(p2.x)..=p1.x.max(p2.x) {
+        line.iter().tuple_windows().for_each(|(p1, p2)| {
+            (p1.x.min(p2.x)..=p1.x.max(p2.x)).for_each(|x| {
                 rocks.insert(Point { x, y: p1.y });
-            }
-            for y in p1.y.min(p2.y)..=p1.y.max(p2.y) {
+            });
+            (p1.y.min(p2.y)..=p1.y.max(p2.y)).for_each(|y| {
                 rocks.insert(Point { x: p1.x, y });
-            }
-        }
+            });
+        });
     }
     rocks
 }
@@ -109,7 +109,6 @@ fn part1(rocks: &HashSet<Point>, maxy: i32) -> usize {
     let mut sands = HashSet::new();
     let mut last_point = START_POINT;
     while enter_sand(rocks, &mut sands, maxy, &mut last_point, true) {}
-
     sands.len()
 }
 
