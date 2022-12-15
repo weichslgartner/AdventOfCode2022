@@ -26,7 +26,7 @@ fn parse(input: &str) -> Vec<(Point, i32)> {
         .collect::<Vec<(Point, i32)>>()
 }
 
-fn is_in_area(sensor: Point, upper: Option<i32>, target: i32, mh: i32) -> (bool, i32, i32) {
+fn is_in_area(sensor: Point, upper: Option<i32>, target: i32, mh: i32) -> Option<(i32, i32)> {
     let dist = mh
         - manhattan_distance(
             sensor,
@@ -36,25 +36,23 @@ fn is_in_area(sensor: Point, upper: Option<i32>, target: i32, mh: i32) -> (bool,
             },
         );
     if dist < 0 {
-        return (false, 0, 0);
+        return None;
     }
     if let Some(upper) = upper {
         let x_min = 0.max(sensor.x - mh);
         let x_max = upper.min(sensor.x + mh);
         if x_min > upper || x_max < 0 {
-            return (false, 0, 0);
+            return None;
         }
-        return (true, 0.max(sensor.x - dist), upper.min(sensor.x + dist));
+        return Some((0.max(sensor.x - dist), upper.min(sensor.x + dist)));
     }
-    (true, sensor.x - dist, sensor.x + dist)
+    Some((sensor.x - dist, sensor.x + dist))
 }
 
 fn get_sorted_ranges(pb: &[(Point, i32)], upper: Option<i32>, y: i32) -> Vec<(i32, i32)> {
     let mut ranges: Vec<_> = pb
         .iter()
-        .map(|(sensor, mh)| is_in_area(*sensor, upper, y, *mh))
-        .filter(|(valid, _, _)| *valid)
-        .map(|(_, x_in, x_max)| (x_in, x_max))
+        .flat_map(|(sensor, mh)| is_in_area(*sensor, upper, y, *mh))
         .collect();
     ranges.sort();
     ranges
