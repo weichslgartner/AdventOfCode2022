@@ -60,8 +60,8 @@ fn get_sorted_ranges(pb: &[(Point, i32)], upper: Option<i32>, y: i32) -> Vec<(i3
     ranges
 }
 
-fn part1(pb: &Vec<(Point, i32)>, target: i32) -> Option<u64> {
-    let ranges = get_sorted_ranges(&pb, None, target);
+fn part1(pb: &[(Point, i32)], target: i32) -> Option<u64> {
+    let ranges = get_sorted_ranges(pb, None, target);
     let mut free_spaces: u64 = 0;
     let mut x = None;
     for (x_min, x_max) in ranges {
@@ -85,10 +85,9 @@ fn part1(pb: &Vec<(Point, i32)>, target: i32) -> Option<u64> {
     Some(free_spaces)
 }
 
-fn part2(pb: &Vec<(Point, i32)>, upper: i32) -> Option<u64> {
+fn part2(pb: &[(Point, i32)], upper: i32) -> Option<u64> {
     for y in 0..=upper {
         let mut x = 0;
-
         let ranges = get_sorted_ranges(pb, Some(upper), y);
         for (x_min, x_max) in ranges {
             if x >= x_min && x <= x_max {
