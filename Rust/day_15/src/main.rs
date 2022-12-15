@@ -39,12 +39,12 @@ fn is_in_area(sensor: Point, upper: Option<i32>, target: i32, mh: i32) -> Option
         return None;
     }
     if let Some(upper) = upper {
-        let x_min = 0.max(sensor.x - mh);
-        let x_max = upper.min(sensor.x + mh);
+        let x_min = 0.max(sensor.x - dist);
+        let x_max = upper.min(sensor.x + dist);
         if x_min > upper || x_max < 0 {
             return None;
         }
-        return Some((0.max(sensor.x - dist), upper.min(sensor.x + dist)));
+        return Some((x_min, x_max));
     }
     Some((sensor.x - dist, sensor.x + dist))
 }
