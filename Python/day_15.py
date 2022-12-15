@@ -2,18 +2,17 @@ from aoc import *
 
 
 def parse_input(lines):
-    return [[Point(ints[0], ints[1]), Point(ints[2], ints[3])] for ints in map(extract_all_ints, lines)]
+    return [[Point(ints[0], ints[1]), Point(ints[2], ints[3]), manhattan_distance(Point(ints[0], ints[1]), Point(ints[2], ints[3]))] for ints in map(extract_all_ints, lines)]
 
 
 def part_1(pb, target=2000000):
     free_set = set()
-    for sensor, beacon in pb:
-        mh = manhattan_distance(sensor, beacon)
+    for sensor, beacon, mh in pb:
         dist = mh - manhattan_distance(sensor, Point(sensor.x, target))
         if dist >= 0:
             for x in range(sensor.x - dist, sensor.x + dist + 1):
                 free_set.add(Point(x, target))
-    for sensor, beacon in pb:
+    for sensor, beacon, mh in pb:
         if sensor.y == target:
             free_set.add(sensor)
         if beacon in free_set:
@@ -21,15 +20,13 @@ def part_1(pb, target=2000000):
     return len(free_set)
 
 
-def is_in_area(sensor, beacon, upper, target):
-    mh = manhattan_distance(sensor, beacon)
+def is_in_area(sensor, upper, target, mh):
+    dist = mh - manhattan_distance(sensor, Point(sensor.x, target))
+    if dist < 0:
+        return False, 0, 0
     x_min = max(sensor.x - mh, 0)
     x_max = min(sensor.x + mh, upper)
     if x_min > upper or x_max < 0:
-        return False, 0, 0
-    mh = manhattan_distance(sensor, beacon)
-    dist = mh - manhattan_distance(sensor, Point(sensor.x, target))
-    if dist < 0:
         return False, 0, 0
     return True, max(sensor.x - dist, 0), min(sensor.x + dist, upper)
 
@@ -39,8 +36,8 @@ def part_2(pb, upper=4000000):
         x = 0
         while x < upper:
             ranges = []
-            for sensor, beacon in pb:
-                isin, x_min, x_max = is_in_area(sensor, beacon, upper, y)
+            for sensor, beacon, mh in pb:
+                isin, x_min, x_max = is_in_area(sensor, upper, y, mh)
                 if isin:
                     ranges.append([x_min, x_max])
             for x_min, x_max in sorted(ranges):
