@@ -75,4 +75,4 @@ def line_to_int(line: str, split_char=",") -> List[int]:
 
 
 def extract_all_ints(line: str) -> List[int]:
-    return list(map(int, (re.findall(r'\d+', line))))
+    return list(map(int, (re.findall(r'-?\d+', line))))
