@@ -1,4 +1,6 @@
-from aoc import *
+from typing import List, Set
+
+from Python.aoc import Point, input_as_str
 
 WIDTH = 7
 shapes = [[Point(x=x, y=0) for x in range(4)],
@@ -9,84 +11,77 @@ shapes = [[Point(x=x, y=0) for x in range(4)],
           ]
 
 
-def parse_input(lines):
-    return lines
-
-
-def move(shape,ground,points, c):
+def move(shape: List[Point], points: Set[Point], c: str) -> List[Point]:
     if c == '>':
         if max(shape, key=lambda p: p.x).x >= WIDTH - 1:
             return shape
         new_shape = [Point(x=p.x + 1, y=p.y) for p in shape]
-        for p in new_shape:
-            if p in points:
-                return shape
+        if any(p in points for p in new_shape):
+            return shape
         return new_shape
     if c == '<':
         if min(shape, key=lambda p: p.x).x <= 0:
             return shape
         new_shape = [Point(x=p.x - 1, y=p.y) for p in shape]
-        for p in new_shape:
-            if p in points:
-                return shape
+        if any(p in points for p in new_shape):
+            return shape
         return new_shape
     if c == 'v':
         return [Point(x=p.x, y=p.y - 1) for p in shape]
 
 
-def hit_ground(ground, shape, points):
-    for p in shape:
-        if ground[p.x] == p.y - 1 or Point(p.x,p.y-1) in points:
-            return True
+def hit_ground(ground: List[int], shape: List[Point], points: Set[Point]) -> bool:
+    if any(ground[p.x] == p.y - 1 or Point(p.x, p.y - 1) in points for p in shape):
+        return True
     return False
 
 
-def part_1(line, rounds=2022):
-    print(shapes)
+def solve(line: str, rounds: int) -> int:
     j = 0
     points = set()
     ground = [0 for _ in range(WIDTH)]
+    cycle_detect = {}
+    periods = []
     for i in range(rounds):
         shape = shapes[i % len(shapes)]
         offset = Point(x=2, y=max(ground) + 4)
         shape = [Point(p.x + offset.x, p.y + offset.y) for p in shape]
         while True:
-            c = line[j % len(line)]
-            j += 1
-            shape = move(shape,ground,points, c)
-            if hit_ground(ground, shape,points):
+            c = line[j]
+            j = (j + 1) % len(line)
+            shape = move(shape, points, c)
+            if hit_ground(ground, shape, points):
                 for p in shape:
                     points.add(p)
                     ground[p.x] = max(ground[p.x], p.y)
-               # print("===")
-               # print_grid(ground, points)
+                top = '-'.join([str(x - min(ground)) for x in ground])
+                if top in cycle_detect:
+                    to_go = rounds - i - 1
+                    period = i - cycle_detect[top][0]
+                    periods.append(period)
+                    cycles = to_go // period
+                    from collections import Counter
+                    if to_go % period == 0 and period == Counter(periods).most_common(1)[0][0] and len(periods) > 300:
+                        return max(ground) + cycles * (max(ground) - cycle_detect[top][1])
+                cycle_detect[top] = (i, max(ground))
                 break
             else:
-                shape = move(shape,ground,points, 'v')
+                shape = move(shape, points, 'v')
     return max(ground)
 
 
-def print_grid(ground, points):
-    for y in reversed(range(max(ground) + 1)):
-        for x in range(WIDTH):
-            p = Point(x, y)
-            if p in points:
-                print('#', end="")
-            else:
-                print('.', end="")
-        print()
-    print()
+def part_1(line: str) -> int:
+    return solve(line, rounds=2022)
 
 
-def part_2(lines):
-    pass
+def part_2(line: str) -> int:
+    return solve(line, rounds=1000000000000)
 
 
 def main():
-    lines = get_lines("input_17.txt")
-    lines = parse_input(lines)
-    print("Part 1:", part_1(lines[0]))
-    print("Part 2:", part_2(lines))
+    line = input_as_str("input_17.txt")
+    print("Part 1:", part_1(line))
+    print("Part 2:", part_2(line))
 
 
 if __name__ == '__main__':
