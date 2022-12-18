@@ -1,8 +1,8 @@
+import re
 from collections import namedtuple
 from itertools import filterfalse, tee, islice
 from pathlib import Path
 from typing import List, Callable, Iterable, Iterator, Any
-import re
 
 
 class Point(namedtuple('Point', 'x y')):
@@ -23,6 +23,11 @@ def to_point(p: str, sep=",") -> Point:
 def get_neighbours_4(p: Point, p_max: Point) -> Iterator[Point]:
     points = [Point(p.x - 1, p.y), Point(p.x, p.y - 1), Point(p.x + 1, p.y), Point(p.x, p.y + 1)]
     return filter(lambda x: is_in_grid(x, p_max), points)
+
+
+def get_neighbours_3d(p: Point3) -> List[Point3]:
+    return [Point3(p.x - 1, p.y, p.z), Point3(p.x, p.y - 1, p.z), Point3(p.x + 1, p.y, p.z),
+            Point3(p.x, p.y + 1, p.z), Point3(p.x, p.y, p.z + 1), Point3(p.x, p.y, p.z - 1)]
 
 
 def get_neighbours_8(p: Point, p_max: Point) -> Iterator[Point]:
