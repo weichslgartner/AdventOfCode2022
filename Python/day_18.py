@@ -65,8 +65,7 @@ def is_outer_surface(point: Point3, points: Set[Point3], min_p: Point3, max_p: P
 
 
 def part_1(points: Set[Point3]) -> int:
-    surface = calc_surface(points)
-    return surface
+    return calc_surface(points)
 
 
 def part_2(points: Set[Point3]) -> int:
