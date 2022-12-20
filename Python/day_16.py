@@ -131,6 +131,8 @@ def part_2(valves, time=25):
             # elephant.time = me.time
             elephant.visited |= me.visited
             elephant.pressure = me.pressure
+            me.pressure = open_to_pressure(me.visited, valve_dict)
+            elephant.pressure = open_to_pressure(elephant.visited, valve_dict)
             elephant.pressure_sum = me.pressure_sum
             new_me = True
         elif me.time > elephant.time:
@@ -139,6 +141,9 @@ def part_2(valves, time=25):
             me.pressure = elephant.pressure
             me.visited |= elephant.visited
             me.pressure_sum = elephant.pressure_sum
+            me.pressure = open_to_pressure(me.visited, valve_dict)
+            elephant.pressure = open_to_pressure(elephant.visited, valve_dict)
+
             new_elephant = True
         else:
             inc_el = open_valve(elephant, valve_dict)
@@ -146,14 +151,17 @@ def part_2(valves, time=25):
             # if inc_me == 22 and inc_el==3:
             #     print("alarm")
             cur_time = elephant.time
-            elephant.pressure += inc_me
             me.pressure += inc_el
             me.visited |= elephant.visited
             elephant.visited |= me.visited
+            elephant.pressure = open_to_pressure(elephant.visited, valve_dict)
+            me.pressure = open_to_pressure(me.visited, valve_dict)
+
 
             new_elephant = True
             new_me = True
-
+        if me.pressure > 81:
+            print("debug")
         # if me.pressure != elephant.pressure:
         #     print("alarm")
         # print(me,elephant)
@@ -215,6 +223,8 @@ def open_valve(cur_state, valve_dict):
         cur_state.pressure += valve_dict[cur_state.pos].pressure
     return valve_dict[cur_state.pos].pressure
 
+def open_to_pressure(visited, valve_dict):
+    return sum(valve_dict[v].pressure for v in visited)
 
 def main():
     lines = get_lines("input_16_test.txt")

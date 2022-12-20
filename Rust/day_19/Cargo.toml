@@ -1,0 +1,15 @@
+[package]
+name = "day_19"
+version = "0.1.0"
+edition = "2021"
+authors = ["weichslgartner <weichslgartner@gmail.com>"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+regex = "1.7.0"
+lazy_static = "1.4.0"
+int-enum = "0.5.0"
+rayon = "1.6"
+futures = "0.3.25"
+tokio =  { version = "1.23.0", features = ["full"] }

@@ -107,7 +107,7 @@ def optimize_blueprint(blueprint, max_time=24):
                 max_geodes = cur.resources[Material.GEODE]
                 print(max_geodes, cur)
         else:
-            if cur.resources[Material.GEODE] + triangular(((max_time - cur.time) +1))  <= max_geodes :
+            if cur.resources[Material.GEODE] + triangular(((max_time - cur.time) +2))  < max_geodes :
                # print("ignore",max_geodes,cur)
                 continue
             cur.time += 1
@@ -157,9 +157,10 @@ def part_2(blueprints):
 
 
 def main():
-    lines = get_lines("input_19_test.txt") #1009 too low 1045 too low
+    lines = get_lines("input_19.txt") #1009 too low 1045 too low
     blueprints = parse_input(lines)
-   # print("Part 1:", part_1(blueprints))
+    print("Part 1:", part_1(blueprints))
+    # part2 still doesn't produce correct result; solution in rust
     print("Part 2:", part_2(blueprints))
 
 
