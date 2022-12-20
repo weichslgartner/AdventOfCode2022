@@ -20,7 +20,7 @@ def solve(lines: List[Tuple[int, int]], rounds: int) -> int:
             new_index = (old_index + n[1]) % (length - 1)
             lines.insert(new_index, lines.pop(old_index))
     idx = lines.index(list(filter(lambda x: x[1] == 0, lines)).pop())
-    return sum(map(lambda x: x[1], (lines[(idx + grove) % length] for grove in [1000, 2000, 3000])))
+    return sum(map(lambda x: x[1], (lines[(idx + grove) % length] for grove in range(1000, 3001, 1000))))
 
 
 def part_1(lines: List[Tuple[int, int]]) -> int:

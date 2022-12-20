@@ -38,6 +38,8 @@ def state_to_str(state: State):
 class Costs(namedtuple('Costs', 'costs material')):
     pass
 
+def triangular(n):
+    return int(n * (n + 1) / 2)
 
 def parse_input(lines):
     blueprints = {}
@@ -83,7 +85,7 @@ def optimize_blueprint(blueprint, max_time=24):
     start = State(time=1, robots=defaultdict(int, {Material.ORE: 1}), resources=defaultdict(int))
     queue.append(start)
     max_geodes = 0
-    max_iter = 80_000_000
+    max_iter = 300_000_000
     i = 0
     visited = defaultdict(lambda: sys.maxsize)
     while len(queue) > 0:
@@ -98,12 +100,20 @@ def optimize_blueprint(blueprint, max_time=24):
         assert (cur.time <= max_time)
         for robot, n in cur.robots.items():
             cur.resources[robot] += n
+       # if triangular(max_time - cur.time) <= max_geodes:
+       #     continue
         if cur.time == max_time:
             if cur.resources[Material.GEODE] > max_geodes:
                 max_geodes = cur.resources[Material.GEODE]
                 print(max_geodes, cur)
         else:
+            if cur.resources[Material.GEODE] + triangular(((max_time - cur.time) +1))  <= max_geodes :
+               # print("ignore",max_geodes,cur)
+                continue
             cur.time += 1
+
+
+
             if can_build(cur, blueprint[Material.GEODE]):
                 queue.append(build_robot(blueprint, cur, Material.GEODE))
             else:
@@ -136,15 +146,21 @@ def can_build(cur, robot):
     return cbuild
 
 
-def part_2(lines):
-    pass
+def part_2(blueprints):
+    sum = 1
+    for k, b in list(blueprints.items())[:3]:
+        print(k, b)
+        res = optimize_blueprint(b,32)
+        sum *= res
+
+    return sum
 
 
 def main():
-    lines = get_lines("input_19.txt") #1009 too low 1045 too low
+    lines = get_lines("input_19_test.txt") #1009 too low 1045 too low
     blueprints = parse_input(lines)
-    print("Part 1:", part_1(blueprints))
-    print("Part 2:", part_2(lines))
+   # print("Part 1:", part_1(blueprints))
+    print("Part 2:", part_2(blueprints))
 
 
 if __name__ == '__main__':
