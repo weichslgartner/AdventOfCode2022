@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from operator import add, mul, sub, floordiv
 from typing import Union
+
+from operator import add, mul, sub, floordiv
+from typing import List
 
 from aoc import get_lines
 
@@ -12,15 +14,18 @@ class Node:
     name: str
     value: int = None
     operator: str = None
-    left: Union[str,'Node'] = None
-    right: Union[str,'Node']  = None
+    left: Union[str, 'Node'] = None
+    right: Union[str, 'Node'] = None
 
+
+calc_cache = {}
+contains_cache = {}
 
 op_fun = {'+': add, '/': floordiv, '-': sub, '*': mul, }
 op_fun_inv_left = {'+': sub, '/': mul, '-': add, '*': floordiv, '=': add}
 
 
-def inv_right(op, target, left):
+def inv_right(op: str, target: int, left: int) -> int:
     if op == '+':
         return target - left
     if op == '-':
@@ -31,7 +36,7 @@ def inv_right(op, target, left):
         return left // target
 
 
-def parse_input(lines):
+def parse_input(lines: List[str]) -> Node:
     node_dict = {}
     for line in lines:
         tokens = line.split(":")
@@ -52,20 +57,26 @@ def parse_input(lines):
 
 
 def calc(node: Node) -> int:
+    if node.name in calc_cache:
+        return calc_cache[node.name]
     if node.value:
+        calc_cache[node.name] = node.value
         return node.value
     return op_fun[node.operator](calc(node.left), calc(node.right))
 
 
-def tree_contains(node: Node, name):
+def tree_contains(node: Node, name: str) -> bool:
+    if node.name in contains_cache:
+        return contains_cache[node.name]
     if node is None:
         return False
     if node.value:
-        return node.name == name
+        contains_cache[node.name] = node.name == name
+        return contains_cache[node.name]
     return tree_contains(node.left, name) or tree_contains(node.right, name)
 
 
-def solve(node, target=0):
+def solve(node: Node, target=0) -> int:
     if node.left.name == HUMN:
         return op_fun_inv_left[node.operator](target, calc(node.right))
     if node.right.name == HUMN:
@@ -81,11 +92,11 @@ def solve(node, target=0):
             return solve(node.right, target)
 
 
-def part_1(root):
-    return int(calc(root))
+def part_1(root: Node) -> int:
+    return calc(root)
 
 
-def part_2(root):
+def part_2(root: Node) -> int:
     return solve(root)
 
 
