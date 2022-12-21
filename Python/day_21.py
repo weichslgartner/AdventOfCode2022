@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from operator import add, mul, truediv, sub, floordiv
+from operator import add, mul, sub, floordiv
+from typing import Union
 
 from aoc import get_lines
 
@@ -11,8 +12,8 @@ class Node:
     name: str
     value: int = None
     operator: str = None
-    left: 'Node' = None
-    right: 'Node' = None
+    left: Union[str,'Node'] = None
+    right: Union[str,'Node']  = None
 
 
 op_fun = {'+': add, '/': floordiv, '-': sub, '*': mul, }
