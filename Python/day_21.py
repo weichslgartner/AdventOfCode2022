@@ -76,7 +76,7 @@ def tree_contains(node: Node, name: str) -> bool:
     return tree_contains(node.left, name) or tree_contains(node.right, name)
 
 
-def solve(node: Node, target=0) -> int:
+def solve(node: Node, target: int = 0) -> int:
     if node.left.name == HUMN:
         return op_fun_inv_left[node.operator](target, calc(node.right))
     if node.right.name == HUMN:
