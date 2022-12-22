@@ -1,7 +1,7 @@
 import re
 import sys
-from enum import Enum, StrEnum
-from typing import Tuple
+from enum import Enum
+from typing import Tuple, Set, Dict, List, Callable
 
 from aoc import input_as_str_nostrip, Point, chunk
 
@@ -10,25 +10,14 @@ HEIGHT = 0
 CUBE_SIDE_SIZE = sys.maxsize
 
 
-class Dir(StrEnum):
-    RIGHT = '>',
-    LEFT = '<',
-    UP = '^',
-    DOWN = 'v'
+class Dir(Enum):
+    RIGHT = 0
+    DOWN = 1
+    LEFT = 2
+    UP = 3
 
 
-def get_facing_value(dir: Dir) -> int:
-    if dir == Dir.RIGHT:
-        return 0
-    if dir == Dir.DOWN:
-        return 1
-    if dir == Dir.LEFT:
-        return 2
-    if dir == Dir.UP:
-        return 3
-
-
-def do_turn(cur_dir, turn) -> Dir:
+def do_turn(cur_dir: Dir, turn: str) -> Dir:
     if len(turn) == 0 or turn not in 'LR':
         return cur_dir
     if cur_dir == Dir.RIGHT:
@@ -54,18 +43,16 @@ def do_turn(cur_dir, turn) -> Dir:
     return cur_dir
 
 
-def parse_input(lines):
+def parse_input(lines: str) -> Tuple[Set[Point], Dict[int, List[int]], Dict[int, List[int]], List[str]]:
     global WIDTH, HEIGHT, CUBE_SIDE_SIZE
     grid, instructions = lines.split('\n\n')
     walls = set()
-    free = set()
     min_max_line = {}
     min_max_row = {}
     for y, line in enumerate(grid.splitlines()):
         HEIGHT = max(y, HEIGHT)
         for x, c in enumerate(line):
             WIDTH = max(x, WIDTH)
-
             p = Point(x, y)
             if c == '#':
                 add_to_min_max(min_max_line, x, y)
@@ -74,234 +61,213 @@ def parse_input(lines):
             elif c == '.':
                 add_to_min_max(min_max_line, x, y)
                 add_to_min_max(min_max_row, y, x)
-                free.add(p)
-    instructions = re.split('(\d+)', instructions.strip())
+    instructions = re.split(r'(\d+)', instructions.strip())
     instructions.pop()
     WIDTH += 1
     HEIGHT += 1
     min_side = min(min_max_line.values(), key=lambda v: v[1] - v[0])
     CUBE_SIDE_SIZE = min_side[1] - min_side[0] + 1
-    return walls, free, min_max_line, min_max_row, instructions
+    return walls, min_max_line, min_max_row, instructions
 
 
-def add_to_min_max(min_max_line, entry, index):
+def add_to_min_max(min_max_line: Dict[int, List[int]], entry: int, index: int):
     if index not in min_max_line:
         min_max_line[index] = [entry, entry]
     else:
         min_max_line[index][1] = entry
 
 
-def get_next(p, dir, min_max_line, min_max_row):
-    if dir == Dir.RIGHT:
+def get_next_wrap(p: Point, direction: Dir, min_max_line: Dict[int, List[int]],
+                  min_max_row: Dict[int, List[int]]) -> Tuple[Dir, Point]:
+    if direction == Dir.RIGHT:
         x_new = p.x + 1
         if x_new > min_max_line[p.y][1]:
             x_new = min_max_line[p.y][0]
-        return dir, Point(x_new, p.y)
-    if dir == Dir.DOWN:
+        return direction, Point(x_new, p.y)
+    if direction == Dir.DOWN:
         y_new = p.y + 1
         if y_new > min_max_row[p.x][1]:
             y_new = min_max_row[p.x][0]
-        return dir, Point(p.x, y_new)
-    if dir == Dir.LEFT:
+        return direction, Point(p.x, y_new)
+    if direction == Dir.LEFT:
         x_new = p.x - 1
         if x_new < min_max_line[p.y][0]:
             x_new = min_max_line[p.y][1]
-        return dir, Point(x_new, p.y)
-    if dir == Dir.UP:
+        return direction, Point(x_new, p.y)
+    if direction == Dir.UP:
         y_new = p.y - 1
         if y_new < min_max_row[p.x][0]:
             y_new = min_max_row[p.x][1]
-        return dir, Point(p.x, y_new)
+        return direction, Point(p.x, y_new)
 
 
-def get_next_real(p, dir, min_max_line, min_max_row) -> Tuple[Dir, Point]:
-    if dir == Dir.RIGHT:
+def get_next_cube(p: Point, direction: Dir, min_max_line: Dict[int, List[int]],
+                  min_max_row: Dict[int, List[int]]) -> Tuple[Dir, Point]:
+    if direction == Dir.RIGHT:
         x_new = p.x + 1
-        # side 1
         if x_new > min_max_line[p.y][1]:
             if p.y < CUBE_SIDE_SIZE:
-                return dir.LEFT, Point(99, (3 * CUBE_SIDE_SIZE - 1) - p.y)
+                return direction.LEFT, Point(x=2*CUBE_SIDE_SIZE-1, y=(3 * CUBE_SIDE_SIZE - 1) - p.y)
             elif p.y < 2 * CUBE_SIDE_SIZE:
-                dir = dir.UP
-                return dir, Point(x=2 * CUBE_SIDE_SIZE + (p.y - CUBE_SIDE_SIZE), y=CUBE_SIDE_SIZE - 1)
+                direction = direction.UP
+                return direction, Point(x=2 * CUBE_SIDE_SIZE + (p.y - CUBE_SIDE_SIZE), y=CUBE_SIDE_SIZE - 1)
             elif p.y < 3 * CUBE_SIDE_SIZE:
-                dir = dir.LEFT
-                return dir, Point(x=3 * CUBE_SIDE_SIZE - 1, y=(3 * CUBE_SIDE_SIZE - 1) - p.y)
+                direction = direction.LEFT
+                return direction, Point(x=3 * CUBE_SIDE_SIZE - 1, y=(3 * CUBE_SIDE_SIZE - 1) - p.y)
             elif p.y < 4 * CUBE_SIDE_SIZE:
-                dir = dir.UP
-                return dir, Point(x=CUBE_SIDE_SIZE + p.y - (3 * CUBE_SIDE_SIZE), y=(3 * CUBE_SIDE_SIZE - 1))
+                direction = direction.UP
+                return direction, Point(x=CUBE_SIDE_SIZE + p.y - (3 * CUBE_SIDE_SIZE), y=(3 * CUBE_SIDE_SIZE - 1))
             else:
                 print("error")
-        return dir, Point(x_new, p.y)
-    if dir == Dir.DOWN:
+        return direction, Point(x_new, p.y)
+    if direction == Dir.DOWN:
         y_new = p.y + 1
         if y_new > min_max_row[p.x][1]:
             if p.x < CUBE_SIDE_SIZE:
-                return dir.DOWN, Point(2 * CUBE_SIDE_SIZE + p.x, 0)
+                return direction.DOWN, Point(x=2 * CUBE_SIDE_SIZE + p.x, y=0)
             elif p.x < 2 * CUBE_SIDE_SIZE:
-                return dir.LEFT, Point(CUBE_SIDE_SIZE - 1, 3 * CUBE_SIDE_SIZE + p.x - CUBE_SIDE_SIZE)
+                return direction.LEFT, Point(x=CUBE_SIDE_SIZE - 1, y=3 * CUBE_SIDE_SIZE + p.x - CUBE_SIDE_SIZE)
             elif p.x < 3 * CUBE_SIDE_SIZE:
-                return dir.LEFT, Point(x=2 * CUBE_SIDE_SIZE - 1, y=CUBE_SIDE_SIZE + p.x - 2 * CUBE_SIDE_SIZE)
+                return direction.LEFT, Point(x=2 * CUBE_SIDE_SIZE - 1, y=CUBE_SIDE_SIZE + p.x - 2 * CUBE_SIDE_SIZE)
             else:
                 print("error")
-        return dir, Point(p.x, y_new)
-    if dir == Dir.LEFT:
+        return direction, Point(p.x, y_new)
+    if direction == Dir.LEFT:
         x_new = p.x - 1
         if x_new < min_max_line[p.y][0]:
             if p.y < CUBE_SIDE_SIZE:
-                return dir.RIGHT, Point(0, (3 * CUBE_SIDE_SIZE - 1) - p.y)
+                return direction.RIGHT, Point(x=0, y=(3 * CUBE_SIDE_SIZE - 1) - p.y)
             elif p.y < 2 * CUBE_SIDE_SIZE:
-                dir = dir.DOWN
-                return dir, Point(x=p.y - CUBE_SIDE_SIZE, y=2 * CUBE_SIDE_SIZE)
+                direction = direction.DOWN
+                return direction, Point(x=p.y - CUBE_SIDE_SIZE, y=2 * CUBE_SIDE_SIZE)
             elif p.y < 3 * CUBE_SIDE_SIZE:
-                dir = dir.RIGHT
-                return dir, Point(x=CUBE_SIDE_SIZE, y=(3 * CUBE_SIDE_SIZE - 1) - p.y)
+                direction = direction.RIGHT
+                return direction, Point(x=CUBE_SIDE_SIZE, y=(3 * CUBE_SIDE_SIZE - 1) - p.y)
             elif p.y < 4 * CUBE_SIDE_SIZE:
-                dir = dir.DOWN
-                return dir, Point(x=CUBE_SIDE_SIZE + p.y - (3 * CUBE_SIDE_SIZE), y=0)
+                direction = direction.DOWN
+                return direction, Point(x=CUBE_SIDE_SIZE + p.y - (3 * CUBE_SIDE_SIZE), y=0)
             else:
                 print("error")
-        return dir, Point(x_new, p.y)
-    if dir == Dir.UP:
+        return direction, Point(x_new, p.y)
+    if direction == Dir.UP:
         y_new = p.y - 1
         if y_new < min_max_row[p.x][0]:
             if p.x < CUBE_SIDE_SIZE:
-                return dir.RIGHT, Point(50, CUBE_SIDE_SIZE + p.x)
+                return direction.RIGHT, Point(x=CUBE_SIDE_SIZE, y=CUBE_SIDE_SIZE + p.x)
             elif p.x < 2 * CUBE_SIDE_SIZE:
-                return dir.RIGHT, Point(0, 3 * CUBE_SIDE_SIZE + p.x - CUBE_SIDE_SIZE)
+                return direction.RIGHT, Point(x=0, y=3 * CUBE_SIDE_SIZE + p.x - CUBE_SIDE_SIZE)
             elif p.x < 3 * CUBE_SIDE_SIZE:
-                return dir.UP, Point(p.x - 2 * CUBE_SIDE_SIZE, 4 * CUBE_SIDE_SIZE - 1)
+                return direction.UP, Point(x=p.x - 2 * CUBE_SIDE_SIZE, y=4 * CUBE_SIDE_SIZE - 1)
             else:
                 print("error")
-        return dir, Point(p.x, y_new)
+        return direction, Point(p.x, y_new)
 
 
-def part_1(walls, free, min_max_line, min_max_row, instructions):
+def solve(walls: Set[Point], min_max_line: Dict[int, List[int]], min_max_row: Dict[int, List[int]],
+          instructions: List[str], next_fun: Callable) -> int:
     cur = Point(y=0, x=min_max_line[0][0])
-    dir = Dir.RIGHT
-    path = {}
+    direction = Dir.RIGHT
     for turn, length in chunk(instructions, size=2):
-        dir = do_turn(dir, turn)
+        direction = do_turn(direction, turn)
         i = 0
-        next = cur
-        path[cur] = dir.value
-        while next not in walls and i <= int(length):
-            cur = next
-            _, next = get_next(cur, dir, min_max_line, min_max_row)
+        next_pos = cur
+        dir_new = direction
+        while next_pos not in walls and i <= int(length):
+            cur = next_pos
+            direction = dir_new
+            dir_new, next_pos = next_fun(cur, direction, min_max_line, min_max_row)
             i += 1
-    return 1000 * (cur.y + 1) + 4 * (cur.x + 1) + get_facing_value(dir)
+    return 1000 * (cur.y + 1) + 4 * (cur.x + 1) + direction.value
 
 
-def print_grid(free, min_max_line, min_max_row, path, walls):
-    for y in range(max(min_max_line.keys())):
-        for x in range(max(min_max_row.keys())):
-            p = Point(x, y)
-            if p in walls:
-                print('#', end='')
-            elif p in path:
-                print(path[p], end='')
-            elif p in free:
-                print('.', end='')
-            else:
-                print(' ', end='')
-        print()
+def part_1(walls: Set[Point], min_max_line: Dict[int, List[int]], min_max_row: Dict[int, List[int]],
+           instructions: List[str]) -> int:
+    return solve(walls, min_max_line, min_max_row, instructions, get_next_wrap)
 
 
-def part_2(walls, free, min_max_line, min_max_row, instructions):
-    tests(min_max_line, min_max_row)
-    cur = Point(y=0, x=min_max_line[0][0])
-    dir = Dir.RIGHT
-    path = {}
-    for turn, length in chunk(instructions, size=2):
-        dir = do_turn(dir, turn)
-        i = 0
-        next = cur
-        dir_new = dir
-        while next not in walls and i <= int(length):
-            cur = next
-            dir = dir_new
-            dir_new, next = get_next_real(cur, dir, min_max_line, min_max_row)
-            i += 1
-    return 1000 * (cur.y + 1) + 4 * (cur.x + 1) + get_facing_value(dir)
+def part_2(walls: Set[Point], min_max_line: Dict[int, List[int]], min_max_row: Dict[int, List[int]],
+           instructions: List[str]) -> int:
+    return solve(walls, min_max_line, min_max_row, instructions, get_next_cube)
 
 
-def tests(min_max_line, min_max_row):
-    dir, p = get_next_real(Point(149, 0), Dir.RIGHT, min_max_line, min_max_row)
-    assert (dir == Dir.LEFT and Point(99, 149) == p)
-    dir, p = get_next_real(Point(149, 49), Dir.RIGHT, min_max_line, min_max_row)
-    assert (dir == Dir.LEFT and Point(99, 100) == p)
+def tests(min_max_line: Dict[int, List[int]], min_max_row: Dict[int, List[int]]):
+    direction, p = get_next_cube(Point(149, 0), Dir.RIGHT, min_max_line, min_max_row)
+    assert (direction == Dir.LEFT and Point(99, 149) == p)
+    direction, p = get_next_cube(Point(149, 49), Dir.RIGHT, min_max_line, min_max_row)
+    assert (direction == Dir.LEFT and Point(99, 100) == p)
 
-    dir, p = get_next_real(Point(99, 50), Dir.RIGHT, min_max_line, min_max_row)
-    assert (dir == Dir.UP and Point(100, 49) == p)
-    dir, p = get_next_real(Point(99, 99), Dir.RIGHT, min_max_line, min_max_row)
-    assert (dir == Dir.UP and Point(149, 49) == p)
+    direction, p = get_next_cube(Point(99, 50), Dir.RIGHT, min_max_line, min_max_row)
+    assert (direction == Dir.UP and Point(100, 49) == p)
+    direction, p = get_next_cube(Point(99, 99), Dir.RIGHT, min_max_line, min_max_row)
+    assert (direction == Dir.UP and Point(149, 49) == p)
 
-    dir, p = get_next_real(Point(99, 100), Dir.RIGHT, min_max_line, min_max_row)
-    assert (dir == Dir.LEFT and Point(149, 49) == p)
-    dir, p = get_next_real(Point(99, 149), Dir.RIGHT, min_max_line, min_max_row)
-    assert (dir == Dir.LEFT and Point(149, 0) == p)
+    direction, p = get_next_cube(Point(99, 100), Dir.RIGHT, min_max_line, min_max_row)
+    assert (direction == Dir.LEFT and Point(149, 49) == p)
+    direction, p = get_next_cube(Point(99, 149), Dir.RIGHT, min_max_line, min_max_row)
+    assert (direction == Dir.LEFT and Point(149, 0) == p)
 
-    dir, p = get_next_real(Point(49, 150), Dir.RIGHT, min_max_line, min_max_row)
-    assert (dir == Dir.UP and Point(50, 149) == p)
-    dir, p = get_next_real(Point(49, 199), Dir.RIGHT, min_max_line, min_max_row)
-    assert (dir == Dir.UP and Point(99, 149) == p)
+    direction, p = get_next_cube(Point(49, 150), Dir.RIGHT, min_max_line, min_max_row)
+    assert (direction == Dir.UP and Point(50, 149) == p)
+    direction, p = get_next_cube(Point(49, 199), Dir.RIGHT, min_max_line, min_max_row)
+    assert (direction == Dir.UP and Point(99, 149) == p)
 
-    dir, p = get_next_real(Point(50, 0), Dir.LEFT, min_max_line, min_max_row)
-    assert (dir == Dir.RIGHT and Point(0, 149) == p)
-    dir, p = get_next_real(Point(50, 49), Dir.LEFT, min_max_line, min_max_row)
-    assert (dir == Dir.RIGHT and Point(0, 100) == p)
+    direction, p = get_next_cube(Point(50, 0), Dir.LEFT, min_max_line, min_max_row)
+    assert (direction == Dir.RIGHT and Point(0, 149) == p)
+    direction, p = get_next_cube(Point(50, 49), Dir.LEFT, min_max_line, min_max_row)
+    assert (direction == Dir.RIGHT and Point(0, 100) == p)
 
-    dir, p = get_next_real(Point(50, 50), Dir.LEFT, min_max_line, min_max_row)
-    assert (dir == Dir.DOWN and Point(0, 100) == p)
-    dir, p = get_next_real(Point(50, 99), Dir.LEFT, min_max_line, min_max_row)
-    assert (dir == Dir.DOWN and Point(49, 100) == p)
+    direction, p = get_next_cube(Point(50, 50), Dir.LEFT, min_max_line, min_max_row)
+    assert (direction == Dir.DOWN and Point(0, 100) == p)
+    direction, p = get_next_cube(Point(50, 99), Dir.LEFT, min_max_line, min_max_row)
+    assert (direction == Dir.DOWN and Point(49, 100) == p)
 
-    dir, p = get_next_real(Point(0, 100), Dir.LEFT, min_max_line, min_max_row)
-    assert (dir == Dir.RIGHT and Point(50, 49) == p)
-    dir, p = get_next_real(Point(0, 149), Dir.LEFT, min_max_line, min_max_row)
-    assert (dir == Dir.RIGHT and Point(50, 0) == p)
+    direction, p = get_next_cube(Point(0, 100), Dir.LEFT, min_max_line, min_max_row)
+    assert (direction == Dir.RIGHT and Point(50, 49) == p)
+    direction, p = get_next_cube(Point(0, 149), Dir.LEFT, min_max_line, min_max_row)
+    assert (direction == Dir.RIGHT and Point(50, 0) == p)
 
-    dir, p = get_next_real(Point(0, 150), Dir.LEFT, min_max_line, min_max_row)
-    assert (dir == Dir.DOWN and Point(50, 0) == p)
-    dir, p = get_next_real(Point(0, 199), Dir.LEFT, min_max_line, min_max_row)
-    assert (dir == Dir.DOWN and Point(99, 0) == p)
+    direction, p = get_next_cube(Point(0, 150), Dir.LEFT, min_max_line, min_max_row)
+    assert (direction == Dir.DOWN and Point(50, 0) == p)
+    direction, p = get_next_cube(Point(0, 199), Dir.LEFT, min_max_line, min_max_row)
+    assert (direction == Dir.DOWN and Point(99, 0) == p)
 
-    dir, p = get_next_real(Point(0, 100), Dir.UP, min_max_line, min_max_row)
-    assert (dir == Dir.RIGHT and Point(50, 50) == p)
-    dir, p = get_next_real(Point(49, 100), Dir.UP, min_max_line, min_max_row)
-    assert (dir == Dir.RIGHT and Point(50, 99) == p)
+    direction, p = get_next_cube(Point(0, 100), Dir.UP, min_max_line, min_max_row)
+    assert (direction == Dir.RIGHT and Point(50, 50) == p)
+    direction, p = get_next_cube(Point(49, 100), Dir.UP, min_max_line, min_max_row)
+    assert (direction == Dir.RIGHT and Point(50, 99) == p)
 
-    dir, p = get_next_real(Point(50, 0), Dir.UP, min_max_line, min_max_row)
-    assert (dir == Dir.RIGHT and Point(0, 150) == p)
-    dir, p = get_next_real(Point(99, 0), Dir.UP, min_max_line, min_max_row)
-    assert (dir == Dir.RIGHT and Point(0, 199) == p)
+    direction, p = get_next_cube(Point(50, 0), Dir.UP, min_max_line, min_max_row)
+    assert (direction == Dir.RIGHT and Point(0, 150) == p)
+    direction, p = get_next_cube(Point(99, 0), Dir.UP, min_max_line, min_max_row)
+    assert (direction == Dir.RIGHT and Point(0, 199) == p)
 
-    dir, p = get_next_real(Point(100, 0), Dir.UP, min_max_line, min_max_row)
-    assert (dir == Dir.UP and Point(0, 199) == p)
-    dir, p = get_next_real(Point(149, 0), Dir.UP, min_max_line, min_max_row)
-    assert (dir == Dir.UP and Point(49, 199) == p)
+    direction, p = get_next_cube(Point(100, 0), Dir.UP, min_max_line, min_max_row)
+    assert (direction == Dir.UP and Point(0, 199) == p)
+    direction, p = get_next_cube(Point(149, 0), Dir.UP, min_max_line, min_max_row)
+    assert (direction == Dir.UP and Point(49, 199) == p)
 
-    dir, p = get_next_real(Point(0, 199), Dir.DOWN, min_max_line, min_max_row)
-    assert (dir == Dir.DOWN and Point(100, 0) == p)
-    dir, p = get_next_real(Point(49, 199), Dir.DOWN, min_max_line, min_max_row)
-    assert (dir == Dir.DOWN and Point(149, 0) == p)
+    direction, p = get_next_cube(Point(0, 199), Dir.DOWN, min_max_line, min_max_row)
+    assert (direction == Dir.DOWN and Point(100, 0) == p)
+    direction, p = get_next_cube(Point(49, 199), Dir.DOWN, min_max_line, min_max_row)
+    assert (direction == Dir.DOWN and Point(149, 0) == p)
 
-    dir, p = get_next_real(Point(50, 149), Dir.DOWN, min_max_line, min_max_row)
-    assert (dir == Dir.LEFT and Point(49, 150) == p)
-    dir, p = get_next_real(Point(99, 149), Dir.DOWN, min_max_line, min_max_row)
-    assert (dir == Dir.LEFT and Point(49, 199) == p)
+    direction, p = get_next_cube(Point(50, 149), Dir.DOWN, min_max_line, min_max_row)
+    assert (direction == Dir.LEFT and Point(49, 150) == p)
+    direction, p = get_next_cube(Point(99, 149), Dir.DOWN, min_max_line, min_max_row)
+    assert (direction == Dir.LEFT and Point(49, 199) == p)
 
-    dir, p = get_next_real(Point(100, 49), Dir.DOWN, min_max_line, min_max_row)
-    assert (dir == Dir.LEFT and Point(99, 50) == p)
-    dir, p = get_next_real(Point(149, 49), Dir.DOWN, min_max_line, min_max_row)
-    assert (dir == Dir.LEFT and Point(99, 99) == p)
+    direction, p = get_next_cube(Point(100, 49), Dir.DOWN, min_max_line, min_max_row)
+    assert (direction == Dir.LEFT and Point(99, 50) == p)
+    direction, p = get_next_cube(Point(149, 49), Dir.DOWN, min_max_line, min_max_row)
+    assert (direction == Dir.LEFT and Point(99, 99) == p)
 
 
 def main():
     lines = input_as_str_nostrip("input_22.txt")
-    walls, free, min_max_line, min_max_row, instructions = parse_input(lines)
-    print("Part 1:", part_1(walls, free, min_max_line, min_max_row, instructions))
-    print("Part 2:", part_2(walls, free, min_max_line, min_max_row, instructions))  # 123265 too low
+    walls, min_max_line, min_max_row, instructions = parse_input(lines)
+    tests(min_max_line, min_max_row)
+    print("Part 1:", part_1(walls, min_max_line, min_max_row, instructions))  # 197160
+    print("Part 2:", part_2(walls, min_max_line, min_max_row, instructions))  # 145065
 
 
 if __name__ == '__main__':
