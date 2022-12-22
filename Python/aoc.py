@@ -60,6 +60,12 @@ def input_as_str(file_name: str) -> str:
         return f.read().strip()
 
 
+def input_as_str_nostrip(file_name: str) -> str:
+    file = Path(__file__).parents[1] / "inputs" / file_name
+    with file.open('r') as f:
+        return f.read()
+
+
 def partition(predicate: Callable, iterable: Iterable) -> (Iterable, Iterable):
     t1, t2 = tee(iterable)
     return filterfalse(predicate, t1), filter(predicate, t2)
