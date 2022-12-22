@@ -26,27 +26,7 @@ class Board:
 def do_turn(cur_dir: Dir, turn: str) -> Dir:
     if len(turn) == 0 or turn not in 'LR':
         return cur_dir
-    if cur_dir == Dir.RIGHT:
-        if turn == 'L':
-            return Dir.UP
-        else:
-            return Dir.DOWN
-    if cur_dir == Dir.DOWN:
-        if turn == 'L':
-            return Dir.RIGHT
-        else:
-            return Dir.LEFT
-    if cur_dir == Dir.LEFT:
-        if turn == 'L':
-            return Dir.DOWN
-        else:
-            return Dir.UP
-    if cur_dir == Dir.UP:
-        if turn == 'L':
-            return Dir.LEFT
-        else:
-            return Dir.RIGHT
-    return cur_dir
+    return Dir((cur_dir.value - 1) % len(Dir)) if turn == 'L' else Dir((cur_dir.value + 1) % len(Dir))
 
 
 def parse_input(lines: str) -> Tuple[Board, List[str]]:
