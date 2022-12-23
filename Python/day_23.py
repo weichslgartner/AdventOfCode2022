@@ -87,12 +87,7 @@ def cnt_empty_space(elves: Set[Point]) -> int:
     maxx = max(elves, key=lambda p: p.x).x
     miny = min(elves, key=lambda p: p.y).y
     maxy = max(elves, key=lambda p: p.y).y
-    cnt = 0
-    for y in range(miny, maxy + 1):
-        for x in range(minx, maxx + 1):
-            if Point(x, y) not in elves:
-                cnt += 1
-    return cnt
+    return sum(sum((Point(x, y) not in elves for x in range(minx, maxx + 1))) for y in range(miny, maxy + 1))
 
 
 def part_1(elves: Set[Point]) -> int:
