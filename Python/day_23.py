@@ -1,7 +1,7 @@
 import sys
 from collections import defaultdict
 from enum import Enum
-from typing import List
+from typing import List, Set, Dict, Tuple
 
 from aoc import get_lines, Point
 
@@ -13,22 +13,22 @@ class Dir(Enum):
     EAST = 3
 
 
-def dir2points(p: Point, d: Dir):
-    if d == Dir.NORTH:
-        return [Point(x=p.x + i, y=p.y - 1) for i in range(-1, 2)]
-    if d == Dir.SOUTH:
-        return [Point(x=p.x + i, y=p.y + 1) for i in range(-1, 2)]
-    if d == Dir.WEST:
-        return [Point(x=p.x - 1, y=p.y + i) for i in range(-1, 2)]
-    if d == Dir.EAST:
-        return [Point(x=p.x + 1, y=p.y + i) for i in range(-1, 2)]
+def dir2points(cur: Point, direct: Dir):
+    if direct == Dir.NORTH:
+        return [Point(x=cur.x + i, y=cur.y - 1) for i in range(-1, 2)]
+    if direct == Dir.SOUTH:
+        return [Point(x=cur.x + i, y=cur.y + 1) for i in range(-1, 2)]
+    if direct == Dir.WEST:
+        return [Point(x=cur.x - 1, y=cur.y + i) for i in range(-1, 2)]
+    if direct == Dir.EAST:
+        return [Point(x=cur.x + 1, y=cur.y + i) for i in range(-1, 2)]
 
 
 def get_neighbours_8(p: Point) -> List[Point]:
     return [Point(p.x + x, p.y + y) for y in range(-1, 2) for x in range(-1, 2) if x != 0 or y != 0]
 
 
-def parse_input(lines):
+def parse_input(lines: List[str]) -> Set[Point]:
     elves = set()
     for y, line in enumerate(lines):
         for x, c in enumerate(line):
@@ -37,40 +37,52 @@ def parse_input(lines):
     return elves
 
 
-def solve(elves, rounds=10):
+def solve(elves: Set[Point], rounds: int = 10) -> int:
     dix = 0
     moves = {}
     move_cnt = defaultdict(int)
     new_elves = set()
     for i in range(rounds):
         # step 1
-        move_cnt.clear()
-        moves.clear()
-        for elf in elves:
-            if any((n in elves for n in get_neighbours_8(elf))):
-                for d in range(len(Dir)):
-                    d = Dir((d + dix) % len(Dir))
-                    neighbors = dir2points(p=elf, d=d)
-                    if all((n not in elves for n in neighbors)):
-                        moves[elf] = neighbors[1]
-                        move_cnt[neighbors[1]] += 1
-                        break
+        determine_moves(dix, elves, move_cnt, moves)
+        # part 2 exit if no movement
         if len(moves) == 0:
             return i + 1
         # step 2
-        new_elves.clear()
-        for elf in elves:
-            if elf in moves and move_cnt[moves[elf]] == 1:
-                new_elves.add(moves[elf])
-            else:
-                new_elves.add(elf)
-        elves, new_elves = new_elves, elves
+        elves, new_elves = move(elves, move_cnt, moves, new_elves)
         # step 3
         dix += 1
     return cnt_empty_space(elves)
 
 
-def cnt_empty_space(elves):
+def determine_moves(d_offset: int, elves: Set[Point], move_cnt: Dict[Point, int], moves: Dict[Point, Point]):
+    move_cnt.clear()
+    moves.clear()
+    for elf in elves:
+        if all((n not in elves for n in get_neighbours_8(elf))):
+            continue
+        for d in range(len(Dir)):
+            d = Dir((d + d_offset) % len(Dir))
+            neighbors = dir2points(cur=elf, direct=d)
+            if all((n not in elves for n in neighbors)):
+                moves[elf] = neighbors[1]
+                move_cnt[neighbors[1]] += 1
+                break
+
+
+def move(elves: Set[Point], move_cnt: Dict[Point, int], moves: Dict[Point, Point], new_elves: Set[Point]) -> Tuple[
+    Set, Set]:
+    new_elves.clear()
+    for elf in elves:
+        if elf in moves and move_cnt[moves[elf]] == 1:
+            new_elves.add(moves[elf])
+        else:
+            new_elves.add(elf)
+    elves, new_elves = new_elves, elves
+    return elves, new_elves
+
+
+def cnt_empty_space(elves: Set[Point]) -> int:
     minx = min(elves, key=lambda p: p.x).x
     maxx = max(elves, key=lambda p: p.x).x
     miny = min(elves, key=lambda p: p.y).y
@@ -83,20 +95,11 @@ def cnt_empty_space(elves):
     return cnt
 
 
-def print_gird(elves):
-    for y in range(-5, 15):
-        for x in range(-5, 15):
-            if Point(x, y) in elves:
-                print("#", end="")
-            else:
-                print('.', end="")
-        print("")
-    print()
-
-def part_1(elves):
+def part_1(elves: Set[Point]) -> int:
     return solve(elves, rounds=10)
 
-def part_2(elves):
+
+def part_2(elves: Set[Point]) -> int:
     return solve(elves, rounds=sys.maxsize)
 
 
