@@ -70,8 +70,8 @@ def determine_moves(d_offset: int, elves: Set[Point], move_cnt: Dict[Point, int]
                 break
 
 
-def move(elves: Set[Point], move_cnt: Dict[Point, int], moves: Dict[Point, Point], new_elves: Set[Point]) -> Tuple[
-    Set, Set]:
+def move(elves: Set[Point], move_cnt: Dict[Point, int], moves: Dict[Point, Point],
+         new_elves: Set[Point]) -> Tuple[Set[Point], Set[Point]]:
     new_elves.clear()
     for elf in elves:
         if elf in moves and move_cnt[moves[elf]] == 1:
