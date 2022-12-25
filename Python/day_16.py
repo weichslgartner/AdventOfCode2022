@@ -247,21 +247,20 @@ def main():
     lines = get_lines("input_16.txt")
     valves = parse_input(lines)
     press_valves = set(valve.name for valve in valves if valve.pressure >0)
-    elephant_set = set()
     best = 0
     for i in range(len(press_valves)//2 +1 ):
         combis = itertools.combinations(press_valves,i)
         for c in combis:
-            print(c)
+           # print(c)
             me = part_1(valves, allowed_set=set(c),time=25)
             elephant = part_1(valves, allowed_set=press_valves-set(c), time=25)
             if me + elephant > best:
                 best = me + elephant
-                print("new best",best,press_valves,elephant_set )
+                #print("new best",best,press_valves,elephant_set )
 
     press_valves = set(valve.name for valve in valves if valve.pressure >0)
     press_valves.add("AA")
-   # print("Part 1:", part_1(valves, allowed_set=set(press_valves), time=29))
+    print("Part 1:", part_1(valves, allowed_set=set(press_valves), time=29))
     print("Part 2:", best)  # too hi 2712 too low 2068
 #incorrect 2175
 
