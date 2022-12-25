@@ -40,7 +40,7 @@ def parse_input(lines):
     return valves
 
 
-def part_1(valves, time=29):
+def part_1(valves, allowed_set,time=25):
     valve_dict = {v.name: v for v in valves}
     dists = {valve.name: find_shortest_paths(valve_dict, valve, valves) for valve in valves}
     print(dists)
@@ -52,7 +52,7 @@ def part_1(valves, time=29):
         cur = queue.popleft()
         open_valve(cur_state=cur, valve_dict=valve_dict)
         costs = [((time - cur.time - abs(dists[cur.pos][val.name]) - 1) * val.pressure, val)
-                 for val in filter(lambda v: v.name not in cur.visited and v.pressure > 0, valves)]
+                 for val in filter(lambda v: v.name not in cur.visited and v.name in allowed_set and v.pressure > 0, valves)]
         # print(sorted(costs, key=lambda x: x[0], reverse=True))
         for cost in costs:
             travel_time = dists[cur.pos][cost[1].name]
@@ -103,12 +103,12 @@ def find_shortest_paths(valve_dict, start, valves):
     return dist
 
 
-def part_2(valves, time=26):
+def part_2(valves, time=25):
     global max_pressure
     valve_dict = {v.name: v for v in valves}
     max_pressure = sum( v.pressure for v in valves)
-    max_pressure = time*max_pressure
-    print(max_pressure,max_pressure/time)
+    max_pressure_ov = time*max_pressure
+    print(max_pressure_ov,max_pressure/time)
     print([v.pressure for v in valves if v.pressure > 0])
     dists = {valve.name: find_shortest_paths(valve_dict, valve, valves) for valve in valves}
     queue = deque()
@@ -118,7 +118,7 @@ def part_2(valves, time=26):
     visited = {}
     while len(queue) > 0:
         me, elephant = queue.popleft()
-        assert (elephant.pressure_sum < max_pressure)
+#        assert (elephant.pressure_sum < max_pressure)
         elephant_old = copy(elephant)
         new_elephant = False
         new_me = False
@@ -147,6 +147,9 @@ def part_2(valves, time=26):
                    valves)) if new_me else [me]
         for next_elephant in elephant_coice:
             for next_me in me_choice:
+                if (time -cur_time) * max_pressure < best:
+                    continue
+
                 if new_me:
                     travel_time = dists[me.pos][next_me.name]
                     if cur_time + travel_time > time:
@@ -159,28 +162,27 @@ def part_2(valves, time=26):
                     if cur_time + travel_time > time:
                         continue
                     next_elephant_state = get_next_state(elephant, next_elephant.name, travel_time)
-                    assert (next_elephant_state.pressure_sum < max_pressure)
+                 #   assert (next_elephant_state.pressure_sum < max_pressure)
 
                 else:
                     next_elephant_state = copy(elephant)
-                    if next_elephant_state.pressure_sum > max_pressure:
-                        print("debug")
-                    assert (next_elephant_state.pressure_sum < max_pressure)
+#                    assert (next_elephant_state.pressure_sum < max_pressure)
 
                 if next_elephant_state.pos == next_me_state.pos:
                     continue
                 time_until_next = min(next_me_state.time - cur_time, next_elephant_state.time - cur_time)
                 #if time_until_next > 25:
                 #    print("debug")
-                assert (time_until_next >= 0)
+ #               assert (time_until_next >= 0)
 #                assert(cur_time + time_until_next <=time )
                 #            next.pressure_sum += cur.pressure * travel_time
                 before = next_elephant_state.pressure_sum
-                assert( next_elephant_state.pressure_sum < max_pressure)
+#                assert( next_elephant_state.pressure_sum < max_pressure)
 
                 next_elephant_state.pressure_sum += elephant.pressure * time_until_next
-                if( next_elephant_state.pressure_sum > max_pressure):
-                    print(elephant)
+              #  if next_elephant_state.pressure_sum > max_pressure:
+
+              #      print(elephant)
                 next_me_state.pressure_sum += me.pressure * time_until_next
 
                 key = ''.join(sorted(next_me_state.visited | next_elephant_state.visited))
@@ -193,8 +195,7 @@ def part_2(valves, time=26):
                     visited[key] = me.time
                 queue.append((next_me_state, next_elephant_state))
 
-        new = me.pressure_sum + me.pressure * (time + 1 - me.time) + elephant.pressure_sum + elephant.pressure * (
-                    time + 1 - elephant.time)
+        #new = me.pressure_sum + me.pressure * (time + 1 - me.time) + elephant.pressure_sum + elephant.pressure * (time + 1 - elephant.time)
         s = calc_pressure(elephant, me, time, valve_dict)
         if s > best:
             best = s
@@ -229,10 +230,10 @@ def open_valve(cur_state, valve_dict):
     if cur_state.pos not in cur_state.visited:
         if valve_dict[cur_state.pos].pressure > 0:
             # if cur_state.pressure > 0:
-            assert (cur_state.pressure_sum < max_pressure)
+#            assert (cur_state.pressure_sum < max_pressure)
 
             cur_state.pressure_sum += cur_state.pressure
-            assert (cur_state.pressure_sum < max_pressure)
+#            assert (cur_state.pressure_sum < max_pressure)
         cur_state.visited.add(cur_state.pos)
         cur_state.pressure += valve_dict[cur_state.pos].pressure
     return valve_dict[cur_state.pos].pressure
@@ -245,8 +246,23 @@ def open_to_pressure(visited, valve_dict):
 def main():
     lines = get_lines("input_16.txt")
     valves = parse_input(lines)
-  #  print("Part 1:", part_1(valves))
-    print("Part 2:", part_2(valves))  # too hi 2712 too low 2068
+    press_valves = set(valve.name for valve in valves if valve.pressure >0)
+    elephant_set = set()
+    best = 0
+    for i in range(len(press_valves)//2 +1 ):
+        combis = itertools.combinations(press_valves,i)
+        for c in combis:
+            print(c)
+            me = part_1(valves, allowed_set=set(c),time=25)
+            elephant = part_1(valves, allowed_set=press_valves-set(c), time=25)
+            if me + elephant > best:
+                best = me + elephant
+                print("new best",best,press_valves,elephant_set )
+
+    press_valves = set(valve.name for valve in valves if valve.pressure >0)
+    press_valves.add("AA")
+   # print("Part 1:", part_1(valves, allowed_set=set(press_valves), time=29))
+    print("Part 2:", best)  # too hi 2712 too low 2068
 #incorrect 2175
 
 if __name__ == '__main__':
