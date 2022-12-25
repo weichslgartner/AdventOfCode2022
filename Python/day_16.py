@@ -170,10 +170,10 @@ def part_2(valves, time=26):
                 if next_elephant_state.pos == next_me_state.pos:
                     continue
                 time_until_next = min(next_me_state.time - cur_time, next_elephant_state.time - cur_time)
-                if time_until_next > 25:
-                    print("debug")
+                #if time_until_next > 25:
+                #    print("debug")
                 assert (time_until_next >= 0)
-                assert(cur_time + time_until_next <=time )
+#                assert(cur_time + time_until_next <=time )
                 #            next.pressure_sum += cur.pressure * travel_time
                 before = next_elephant_state.pressure_sum
                 assert( next_elephant_state.pressure_sum < max_pressure)
@@ -182,17 +182,36 @@ def part_2(valves, time=26):
                 if( next_elephant_state.pressure_sum > max_pressure):
                     print(elephant)
                 next_me_state.pressure_sum += me.pressure * time_until_next
-                if next_elephant_state.pressure_sum -before> 800:
-                    print("debug")
+
+                key = ''.join(sorted(next_me_state.visited | next_elephant_state.visited))
+                # print(key,next.time )
+                if key in visited:
+                    if visited[key] >= me.time:
+                        queue.append((next_me_state, next_elephant_state))
+                        visited[key] = me.time
+                else:
+                    visited[key] = me.time
                 queue.append((next_me_state, next_elephant_state))
 
         new = me.pressure_sum + me.pressure * (time + 1 - me.time) + elephant.pressure_sum + elephant.pressure * (
                     time + 1 - elephant.time)
-        if new > best:
-            best = new
-            print(best, me.pressure, elephant.pressure, me, elephant)
+        s = calc_pressure(elephant, me, time, valve_dict)
+        if s > best:
+            best = s
+            print(s, best, me.pressure, elephant.pressure, me, elephant)
 
     return best
+
+
+def calc_pressure(elephant, me, time, valve_dict):
+    s = 0
+    for state in me.history:
+        v_time, pos = state[0], state[1]
+        s += (time - v_time) * valve_dict[pos].pressure
+    for state in elephant.history:
+        v_time, pos = state[0], state[1]
+        s += (time - v_time) * valve_dict[pos].pressure
+    return s
 
 
 def get_next_state(cur, next_me_name, travel_time):
@@ -204,11 +223,6 @@ def get_next_state(cur, next_me_name, travel_time):
     return next
 
 
-# next = State(pos=cost[1].name, time=cur.time + travel_time + 1, pressure=cur.pressure,
-#              pressure_sum=cur.pressure_sum + travel_time * cur.pressure, visited=copy(cur.visited),
-#              # history=copy(cur.history)
-#              )
-# next.history.append((cur.time + travel_time, cost[1].name, cur.pressure, cur.pressure_sum))
 
 def open_valve(cur_state, valve_dict):
     global max_pressure
@@ -229,11 +243,11 @@ def open_to_pressure(visited, valve_dict):
 
 
 def main():
-    lines = get_lines("input_16_test.txt")
+    lines = get_lines("input_16.txt")
     valves = parse_input(lines)
   #  print("Part 1:", part_1(valves))
-    print("Part 2:", part_2(valves))  # too hi 2712 too low 1965
-
+    print("Part 2:", part_2(valves))  # too hi 2712 too low 2068
+#incorrect 2175
 
 if __name__ == '__main__':
     main()

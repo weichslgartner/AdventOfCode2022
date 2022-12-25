@@ -59,12 +59,12 @@ def determine_moves(d_offset: int, elves: Set[Point], move_cnt: Dict[Point, int]
     move_cnt.clear()
     moves.clear()
     for elf in elves:
-        if all((n not in elves for n in get_neighbours_8(elf))):
+        if all(n not in elves for n in get_neighbours_8(elf)):
             continue
         for d in range(len(Dir)):
             d = Dir((d + d_offset) % len(Dir))
             neighbors = dir2points(cur=elf, direct=d)
-            if all((n not in elves for n in neighbors)):
+            if all(n not in elves for n in neighbors):
                 moves[elf] = neighbors[1]
                 move_cnt[neighbors[1]] += 1
                 break
@@ -102,7 +102,7 @@ def main():
     lines = get_lines("input_23.txt")
     elves = parse_input(lines)
     print("Part 1:", part_1(elves.copy()))
-    print("Part 2:", part_2(elves))
+    #print("Part 2:", part_2(elves))
 
 
 if __name__ == '__main__':
