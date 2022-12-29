@@ -33,7 +33,7 @@ def part_1(lines : List[str]):
 
 
 def main():
-    lines = get_lines("input_25.txt")
+    lines = get_lines("input_25_test.txt")
     print("Part 1:", part_1(lines))
 
 
