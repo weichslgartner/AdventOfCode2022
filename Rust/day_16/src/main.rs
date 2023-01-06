@@ -119,7 +119,7 @@ fn main() {
         .keys()
         .map(|name| (name.as_str(), find_shortest_paths(name, &valves)))
         .collect();
-    //println!("{valves:?}");
+    println!("{:?}", valves.keys());
     println!("Part 1: {}", part1(&valves, &dists, 29));
     //println!("Part 2: {}", part2(&input));
 }
