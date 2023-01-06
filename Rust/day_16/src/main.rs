@@ -77,7 +77,6 @@ fn part1(
     time: u8,
 ) -> u32 {
     let mut queue: VecDeque<State> = VecDeque::new();
-    let mut mem: HashMap<BitSet, u8> = HashMap::new();
     let start_state = State {
         pos: "AA",
         time: 0,
@@ -100,16 +99,13 @@ fn part1(
         }) {
             let mut new_visited = cur.visited.clone();
             new_visited.insert(valve2usize(next_pos));
-            if !mem.contains_key(&new_visited) || mem[&new_visited] >= cur.time - 2 + *cost {
-                mem.insert(new_visited.clone(), cur.time + *cost + 1);
-                queue.push_back(State {
-                    pos: next_pos,
-                    time: cur.time + *cost + 1,
-                    pressure: cur.pressure + valves[*next_pos].pressure,
-                    pressure_sum: cur.pressure_sum + cur.pressure * ((*cost + 1) as u32),
-                    visited: new_visited,
-                });
-            }
+            queue.push_back(State {
+                pos: next_pos,
+                time: cur.time + *cost + 1,
+                pressure: cur.pressure + valves[*next_pos].pressure,
+                pressure_sum: cur.pressure_sum + cur.pressure * ((*cost + 1) as u32),
+                visited: new_visited,
+            });
         }
     }
     best
@@ -158,7 +154,6 @@ fn main() {
         .keys()
         .map(|name| (name.as_str(), find_shortest_paths(name, &valves)))
         .collect();
-    //println!("{:?} {}", valves.keys().into_iter().map(|x| valve2usize(x.as_str())).collect::<Vec<_>>(), valves.len());
     println!(
         "Part 1: {}",
         part1(
