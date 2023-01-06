@@ -122,7 +122,7 @@ fn part2(
         .map(|(key, _)| valve2usize(key.as_str()))
         .collect();
 
-    (0..=press_valves.len() / 2)
+    (0..press_valves.len() / 2)
         .into_par_iter()
         .map(|i| {
             let vec: Vec<_> = press_valves.iter().combinations(i).collect();
