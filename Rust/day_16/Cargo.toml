@@ -9,3 +9,4 @@ authors = ["weichslgartner <weichslgartner@gmail.com>"]
 [dependencies]
 itertools = "0.8.0"
 bit-set = "0.5.3"
+rayon = "1.6"

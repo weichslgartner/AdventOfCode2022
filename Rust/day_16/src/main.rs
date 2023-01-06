@@ -1,5 +1,6 @@
 use bit_set::BitSet;
 use itertools::Itertools;
+use rayon::prelude::*;
 use std::collections::{HashMap, HashSet, VecDeque};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -99,7 +100,7 @@ fn part1(
         }) {
             let mut new_visited = cur.visited.clone();
             new_visited.insert(valve2usize(next_pos));
-            if !mem.contains_key(&new_visited) || mem[&new_visited] >= cur.time -2  + *cost  {
+            if !mem.contains_key(&new_visited) || mem[&new_visited] >= cur.time - 2 + *cost {
                 mem.insert(new_visited.clone(), cur.time + *cost + 1);
                 queue.push_back(State {
                     pos: next_pos,
@@ -124,20 +125,21 @@ fn part2(
         .filter(|(_, v)| v.pressure > 0)
         .map(|(key, _)| valve2usize(key.as_str()))
         .collect();
-    let mut best = 0;
-    for i in 0..=press_valves.len() / 2 {
+    
+    (0..=press_valves.len() / 2).into_par_iter().map(|i| {
         let it = press_valves.iter().combinations(i);
+        let mut best = 0;
         for c in it {
-            let me_set: BitSet = c.iter().map(|x| *x).collect();
+            let me_set: BitSet = c.iter().copied().collect();
             let elephant_set: BitSet = press_valves.difference(&me_set).collect();
             let me = part1(valves, dists, me_set, time);
             let elephant = part1(valves, dists, elephant_set, time);
-            if me +elephant > best{
-                best =  me +elephant;
+            if me + elephant > best {
+                best = me + elephant;
             }
         }
-    }
-    best
+        best
+    }).max().unwrap()
 }
 
 fn valve2usize(input: &str) -> usize {
