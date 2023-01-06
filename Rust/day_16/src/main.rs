@@ -1,3 +1,5 @@
+use bit_set::BitSet;
+use itertools::Itertools;
 use std::collections::{HashMap, HashSet, VecDeque};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -13,7 +15,7 @@ struct State<'a> {
     time: u8,
     pressure: u32,
     pressure_sum: u32,
-    visited: HashSet<&'a str>,
+    visited: BitSet,
 }
 
 fn parse(input: &str) -> HashMap<String, Valve> {
@@ -70,16 +72,17 @@ fn find_shortest_paths<'a>(
 fn part1(
     valves: &HashMap<String, Valve>,
     dists: &HashMap<&str, HashMap<&str, u8>>,
+    allowed_valves: BitSet,
     time: u8,
 ) -> u32 {
     let mut queue: VecDeque<State> = VecDeque::new();
-    //let mut in_queue: HashSet<_> = HashSet::new();
+    let mut mem: HashMap<BitSet, u8> = HashMap::new();
     let start_state = State {
         pos: "AA",
         time: 0,
         pressure: 0,
         pressure_sum: 0,
-        visited: HashSet::new(),
+        visited: BitSet::with_capacity(valves.len()),
     };
     let mut best: u32 = 0;
     queue.push_back(start_state);
@@ -88,28 +91,59 @@ fn part1(
         let costs = cur.pressure_sum + cur.pressure * ((time + 1 - cur.time) as u32);
         if cur.time <= time && costs > best {
             best = costs;
-            //println!("{best} {cur:?}");
         }
         for (next_pos, cost) in dists[&cur.pos].iter().filter(|(x, t)| {
-            valves[**x].pressure > 0 && cur.time + **t < time && !cur.visited.contains(**x)
+            cur.time + **t < time
+                && !cur.visited.contains(valve2usize(x))
+                && allowed_valves.contains(valve2usize(x))
         }) {
             let mut new_visited = cur.visited.clone();
-            new_visited.insert(next_pos);
-            queue.push_back(State {
-                pos: next_pos,
-                time: cur.time + *cost + 1,
-                pressure: cur.pressure + valves[*next_pos].pressure,
-                pressure_sum: cur.pressure_sum + cur.pressure * ((*cost + 1) as u32),
-                visited: new_visited,
-            });
+            new_visited.insert(valve2usize(next_pos));
+            if !mem.contains_key(&new_visited) || mem[&new_visited] >= cur.time -2  + *cost  {
+                mem.insert(new_visited.clone(), cur.time + *cost + 1);
+                queue.push_back(State {
+                    pos: next_pos,
+                    time: cur.time + *cost + 1,
+                    pressure: cur.pressure + valves[*next_pos].pressure,
+                    pressure_sum: cur.pressure_sum + cur.pressure * ((*cost + 1) as u32),
+                    visited: new_visited,
+                });
+            }
         }
     }
-
     best
 }
 
-fn part2(input: &str) -> &str {
-    input
+fn part2(
+    valves: &HashMap<String, Valve>,
+    dists: &HashMap<&str, HashMap<&str, u8>>,
+    time: u8,
+) -> u32 {
+    let press_valves: BitSet = valves
+        .iter()
+        .filter(|(_, v)| v.pressure > 0)
+        .map(|(key, _)| valve2usize(key.as_str()))
+        .collect();
+    let mut best = 0;
+    for i in 0..=press_valves.len() / 2 {
+        let it = press_valves.iter().combinations(i);
+        for c in it {
+            let me_set: BitSet = c.iter().map(|x| *x).collect();
+            let elephant_set: BitSet = press_valves.difference(&me_set).collect();
+            let me = part1(valves, dists, me_set, time);
+            let elephant = part1(valves, dists, elephant_set, time);
+            if me +elephant > best{
+                best =  me +elephant;
+            }
+        }
+    }
+    best
+}
+
+fn valve2usize(input: &str) -> usize {
+    assert!(input.len() == 2);
+    (input.chars().next().unwrap() as usize - 'A' as usize) * 32
+        + (input.chars().nth(1).unwrap() as usize - 'A' as usize)
 }
 
 fn main() {
@@ -119,7 +153,19 @@ fn main() {
         .keys()
         .map(|name| (name.as_str(), find_shortest_paths(name, &valves)))
         .collect();
-    println!("{:?}", valves.keys());
-    println!("Part 1: {}", part1(&valves, &dists, 29));
-    //println!("Part 2: {}", part2(&input));
+    //println!("{:?} {}", valves.keys().into_iter().map(|x| valve2usize(x.as_str())).collect::<Vec<_>>(), valves.len());
+    println!(
+        "Part 1: {}",
+        part1(
+            &valves,
+            &dists,
+            valves
+                .iter()
+                .filter(|(_, valve)| valve.pressure > 0)
+                .map(|(key, _)| valve2usize(key.as_str()))
+                .collect(),
+            29
+        )
+    );
+    println!("Part 2: {}", part2(&valves, &dists, 25));
 }
