@@ -244,7 +244,7 @@ def open_to_pressure(visited, valve_dict):
 
 
 def main():
-    lines = get_lines("input_16.txt")
+    lines = get_lines("input_16_test.txt")
     valves = parse_input(lines)
     press_valves = set(valve.name for valve in valves if valve.pressure >0)
     best = 0
