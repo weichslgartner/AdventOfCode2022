@@ -125,21 +125,24 @@ fn part2(
         .filter(|(_, v)| v.pressure > 0)
         .map(|(key, _)| valve2usize(key.as_str()))
         .collect();
-    
-    (0..=press_valves.len() / 2).into_par_iter().map(|i| {
-        let it = press_valves.iter().combinations(i);
-        let mut best = 0;
-        for c in it {
-            let me_set: BitSet = c.iter().copied().collect();
-            let elephant_set: BitSet = press_valves.difference(&me_set).collect();
-            let me = part1(valves, dists, me_set, time);
-            let elephant = part1(valves, dists, elephant_set, time);
-            if me + elephant > best {
-                best = me + elephant;
-            }
-        }
-        best
-    }).max().unwrap()
+
+    (0..=press_valves.len() / 2)
+        .into_par_iter()
+        .map(|i| {
+            let vec: Vec<_> = press_valves.iter().combinations(i).collect();
+            vec.into_par_iter()
+                .map(|c| {
+                    let me_set: BitSet = c.iter().copied().collect();
+                    let elephant_set: BitSet = press_valves.difference(&me_set).collect();
+                    let me = part1(valves, dists, me_set, time);
+                    let elephant = part1(valves, dists, elephant_set, time);
+                    me + elephant
+                })
+                .max()
+                .unwrap()
+        })
+        .max()
+        .unwrap()
 }
 
 fn valve2usize(input: &str) -> usize {
