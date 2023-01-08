@@ -43,8 +43,6 @@ def solve(line: str, rounds: int) -> int:
     cycle_detect = {}
     periods = []
     for i in range(rounds):
-        if i == 1699:
-            print(f"{i} {ground}")
         shape = shapes[i % len(shapes)]
         offset = Point(x=2, y=max(ground) + 4)
         shape = [Point(p.x + offset.x, p.y + offset.y) for p in shape]
@@ -83,7 +81,7 @@ def part_2(line: str) -> int:
 def main():
     line = input_as_str("input_17.txt")
     print("Part 1:", part_1(line))
-   # print("Part 2:", part_2(line))
+    print("Part 2:", part_2(line))
 
 
 if __name__ == '__main__':
