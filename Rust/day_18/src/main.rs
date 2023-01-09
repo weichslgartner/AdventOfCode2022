@@ -8,8 +8,8 @@ struct Point3 {
     z: i32,
 }
 
-fn get_neighbours_3d(p: &Point3) -> Vec<Point3> {
-    vec![
+fn get_neighbours_3d(p: &Point3) -> [Point3; 6] {
+    [
         Point3 {
             x: p.x + 1,
             y: p.y,
