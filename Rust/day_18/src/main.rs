@@ -45,11 +45,11 @@ fn get_neighbours_3d(p: &Point3) -> Vec<Point3> {
 
 fn parse_input(lines: &str) -> HashSet<Point3> {
     HashSet::from_iter(lines.lines().map(|line| {
-        let coords: Vec<i32> = line.split(',').map(|s| s.parse().unwrap()).collect();
+        let mut coords = line.splitn(3, ',').map(|s| s.parse().unwrap());
         Point3 {
-            x: coords[0],
-            y: coords[1],
-            z: coords[2],
+            x: coords.next().unwrap(),
+            y: coords.next().unwrap(),
+            z: coords.next().unwrap(),
         }
     }))
 }
@@ -100,12 +100,27 @@ fn find_holes(
 }
 
 fn find_limits(points: &HashSet<Point3>) -> (Point3, Point3) {
-    let max_x = points.iter().max_by_key(|p| p.x).unwrap().x;
-    let max_y = points.iter().max_by_key(|p| p.y).unwrap().y;
-    let max_z = points.iter().max_by_key(|p| p.z).unwrap().z;
-    let min_x = points.iter().min_by_key(|p| p.x).unwrap().x;
-    let min_y = points.iter().min_by_key(|p| p.y).unwrap().y;
-    let min_z = points.iter().min_by_key(|p| p.z).unwrap().z;
+    let (min_x, min_y, min_z, max_x, max_y, max_z) = points.iter().fold(
+        (
+            i32::max_value(),
+            i32::max_value(),
+            i32::max_value(),
+            i32::min_value(),
+            i32::min_value(),
+            i32::min_value(),
+        ),
+        |(min_x, min_y, min_z, max_x, max_y, max_z), p| {
+            (
+                min_x.min(p.x),
+                min_y.min(p.y),
+                min_z.min(p.z),
+                max_x.max(p.x),
+                max_y.max(p.y),
+                max_z.max(p.z),
+            )
+        },
+    );
+
     (
         Point3 {
             x: max_x,
