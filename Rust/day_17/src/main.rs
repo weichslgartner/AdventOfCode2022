@@ -34,9 +34,8 @@ fn generate_shapes() -> [Vec<Point>; 5] {
             .chain((0..3).map(|x| Point::new(x, 1)))
             .chain(vec![Point::new(1, 2)].into_iter())
             .collect(),
-        vec![Point::new(0, 0)]
-            .into_iter()
-            .chain((1..3).map(|x| Point::new(x, 0)))
+        (0..3)
+            .map(|x| Point::new(x, 0))
             .chain((1..3).map(|y| Point::new(2, y)))
             .collect(),
         (0..4).map(|y| Point::new(0, y)).collect(),
@@ -139,7 +138,7 @@ fn part1(input: &str) -> usize {
 }
 
 fn part2(input: &str) -> usize {
-    solve(input, 1000000000000)
+    solve(input, 1_000_000_000_000)
 }
 
 fn main() {

@@ -75,7 +75,7 @@ def part_1(line: str) -> int:
 
 
 def part_2(line: str) -> int:
-    return solve(line, rounds=1000000000000)
+    return solve(line, rounds=1_000_000_000_000)
 
 
 def main():
