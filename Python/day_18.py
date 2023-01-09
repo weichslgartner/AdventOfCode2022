@@ -49,18 +49,18 @@ def find_limits(points: Set[Point3]) -> Tuple[Point3, Point3]:
 
 
 def is_outer_surface(point: Point3, points: Set[Point3], min_p: Point3, max_p: Point3) -> Tuple[bool, Set[Point3]]:
-    queue = []
+    stack = []
     visited = set()
-    queue.append(point)
-    while len(queue) > 0:
-        cur = queue.pop()
+    stack.append(point)
+    while len(stack) > 0:
+        cur = stack.pop()
         if cur.x > max_p.x or cur.y > max_p.y or cur.z > max_p.z \
                 or cur.x < min_p.x or cur.y < min_p.y or cur.z < min_p.z:
             return True, visited
         visited.add(cur)
         for n in get_neighbours_3d(cur):
             if n not in points and n not in visited:
-                queue.append(n)
+                stack.append(n)
     return False, visited
 
 
