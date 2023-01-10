@@ -81,15 +81,14 @@ def solve(node: Node, target: int = 0) -> int:
         return op_fun_inv_left[node.operator](target, calc(node.right))
     if node.right.name == HUMN:
         return inv_right(node.operator, target, left=calc(node.left))
-    if not node.value:
-        if tree_contains(node.left, HUMN):
-            res = calc(node.right)
-            target = op_fun_inv_left[node.operator](target, res)
-            return solve(node.left, target)
-        else:
-            res = calc(node.left)
-            target = inv_right(node.operator, target, left=res)
-            return solve(node.right, target)
+    if tree_contains(node.left, HUMN):
+        res = calc(node.right)
+        target = op_fun_inv_left[node.operator](target, res)
+        return solve(node.left, target)
+    else:
+        res = calc(node.left)
+        target = inv_right(node.operator, target, left=res)
+        return solve(node.right, target)
 
 
 def part_1(root: Node) -> int:
@@ -101,7 +100,7 @@ def part_2(root: Node) -> int:
 
 
 def main():
-    lines = get_lines("input_21.txt")
+    lines = get_lines("input_21_test.txt")
     root = parse_input(lines)
     print("Part 1:", part_1(root))  # 63119856257960
     root.operator = '='
