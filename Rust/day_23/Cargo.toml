@@ -1,0 +1,11 @@
+[package]
+name = "day_23"
+version = "0.1.0"
+edition = "2021"
+authors = ["weichslgartner <weichslgartner@gmail.com>"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+enum-iterator = "1.2.0"
+int-enum = "0.5.0"

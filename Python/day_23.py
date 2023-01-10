@@ -38,20 +38,18 @@ def parse_input(lines: List[str]) -> Set[Point]:
 
 
 def solve(elves: Set[Point], rounds: int = 10) -> int:
-    dix = 0
     moves = {}
     move_cnt = defaultdict(int)
     new_elves = set()
     for i in range(rounds):
         # step 1
-        determine_moves(dix, elves, move_cnt, moves)
+        determine_moves(i, elves, move_cnt, moves)
         # part 2 exit if no movement
         if len(moves) == 0:
             return i + 1
         # step 2
         elves, new_elves = move(elves, move_cnt, moves, new_elves)
-        # step 3
-        dix += 1
+        # step 3 loop increment implicit
     return cnt_empty_space(elves)
 
 
@@ -102,7 +100,7 @@ def main():
     lines = get_lines("input_23.txt")
     elves = parse_input(lines)
     print("Part 1:", part_1(elves.copy()))
-    #print("Part 2:", part_2(elves))
+    print("Part 2:", part_2(elves))
 
 
 if __name__ == '__main__':
