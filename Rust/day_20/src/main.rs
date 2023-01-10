@@ -18,7 +18,7 @@ fn solve(mut lines: Vec<(usize, i64)>, rounds: usize) -> i64 {
                 continue;
             }
 
-            let new_index = ((old_index as i64 + n.1).rem_euclid(length as i64 - 1)) as usize;
+            let new_index = (old_index as i64 + n.1).rem_euclid(length as i64 - 1) as usize;
             let old = lines.remove(old_index);
             lines.insert(new_index, old);
         }
