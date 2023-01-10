@@ -21,6 +21,10 @@ impl<'a> Node<'a> {
             right: None,
         }
     }
+
+    fn is_leaf(&self) -> bool {
+        self.value.is_some()
+    }
 }
 
 fn op_norm(c: char, a: i64, b: i64) -> i64 {
@@ -55,7 +59,7 @@ fn op_inv_right(c: char, a: i64, b: i64) -> i64 {
 }
 
 fn parse_input(lines: &str) -> HashMap<&str, Node> {
-    let mut node_dict = HashMap::new();
+    let mut nodes = HashMap::new();
     for line in lines.lines() {
         let mut tokens = line.split(':');
         let mut node = Node::new(tokens.next().unwrap());
@@ -72,9 +76,9 @@ fn parse_input(lines: &str) -> HashMap<&str, Node> {
             node.operator = Some(rhs[1].chars().next().unwrap());
             node.right = Some(rhs[2]);
         }
-        node_dict.insert(node.name, node);
+        nodes.insert(node.name, node);
     }
-    node_dict
+    nodes
 }
 
 fn calc(node: Node, nodes: &HashMap<&str, Node>) -> i64 {
@@ -90,7 +94,7 @@ fn calc(node: Node, nodes: &HashMap<&str, Node>) -> i64 {
 
 fn tree_contains(node: Option<Node>, name: &str, nodes: &HashMap<&str, Node>) -> bool {
     if let Some(node) = node {
-        if node.value.is_some() {
+        if node.is_leaf() {
             return node.name == name;
         }
         return tree_contains(nodes.get(&node.left.unwrap()).copied(), name, nodes)
