@@ -5,10 +5,10 @@ use std::collections::{HashMap, HashSet};
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, Sequence, IntEnum)]
 enum Dir {
-    NORTH = 0,
-    SOUTH = 1,
-    WEST = 2,
-    EAST = 3,
+    North = 0,
+    South = 1,
+    West = 2,
+    East = 3,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
@@ -17,44 +17,6 @@ struct Point {
     y: i32,
 }
 
-fn dir2points(cur: Point, direct: Dir) -> Vec<Point> {
-    match direct {
-        Dir::NORTH => (-1..=1)
-            .map(|i| Point {
-                x: cur.x + i,
-                y: cur.y - 1,
-            })
-            .collect(),
-        Dir::SOUTH => (-1..=1)
-            .map(|i| Point {
-                x: cur.x + i,
-                y: cur.y + 1,
-            })
-            .collect(),
-        Dir::WEST => (-1..=1)
-            .map(|i| Point {
-                x: cur.x - 1,
-                y: cur.y + i,
-            })
-            .collect(),
-        Dir::EAST => (-1..=1)
-            .map(|i| Point {
-                x: cur.x + 1,
-                y: cur.y + i,
-            })
-            .collect(),
-    }
-}
-fn get_neighbours_8(p: Point) -> Vec<Point> {
-    (-1..=1)
-        .flat_map(|y| (-1..=1).map(move |x| (x, y)))
-        .filter(|(x, y)| *x != 0 || *y != 0)
-        .map(|(x, y)| Point {
-            x: p.x + x,
-            y: p.y + y,
-        })
-        .collect()
-}
 fn parse_input(lines: &str) -> HashSet<Point> {
     let mut elves = HashSet::new();
     for (y, line) in lines.lines().enumerate() {
@@ -68,6 +30,46 @@ fn parse_input(lines: &str) -> HashSet<Point> {
         }
     }
     elves
+}
+
+fn dir2points(cur: Point, direct: Dir) -> Vec<Point> {
+    match direct {
+        Dir::North => (-1..=1)
+            .map(|i| Point {
+                x: cur.x + i,
+                y: cur.y - 1,
+            })
+            .collect(),
+        Dir::South => (-1..=1)
+            .map(|i| Point {
+                x: cur.x + i,
+                y: cur.y + 1,
+            })
+            .collect(),
+        Dir::West => (-1..=1)
+            .map(|i| Point {
+                x: cur.x - 1,
+                y: cur.y + i,
+            })
+            .collect(),
+        Dir::East => (-1..=1)
+            .map(|i| Point {
+                x: cur.x + 1,
+                y: cur.y + i,
+            })
+            .collect(),
+    }
+}
+
+fn get_neighbours_8(p: Point) -> Vec<Point> {
+    (-1..=1)
+        .flat_map(|y| (-1..=1).map(move |x| (x, y)))
+        .filter(|(x, y)| *x != 0 || *y != 0)
+        .map(|(x, y)| Point {
+            x: p.x + x,
+            y: p.y + y,
+        })
+        .collect()
 }
 
 fn solve(mut elves: HashSet<Point>, rounds: i32) -> i32 {
@@ -104,9 +106,9 @@ fn determine_moves(
                     .unwrap(),
             );
             if neighbours.iter().all(|n| !elves.contains(n)) {
-                moves.insert(elf.clone(), neighbours[1].clone());
+                moves.insert(*elf, neighbours[1]);
                 move_cnt
-                    .entry(neighbours[1].clone())
+                    .entry(neighbours[1])
                     .and_modify(|c| *c += 1)
                     .or_insert(1);
                 break;
@@ -148,14 +150,11 @@ fn cnt_empty_space(elves: &HashSet<Point>) -> i32 {
 
 fn part1(elves: HashSet<Point>) -> i32 {
     solve(elves, 10)
-
 }
 
 fn part2(elves: HashSet<Point>) -> i32 {
     solve(elves, i32::MAX)
-
 }
-
 
 fn main() {
     let input = include_str!("../../../inputs/input_23.txt");
