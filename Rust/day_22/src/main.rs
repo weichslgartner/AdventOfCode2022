@@ -337,7 +337,6 @@ fn solve(
         );
         direction = do_turn(direction, turn);
         (cur, direction) = do_move(cur, direction, length, board, next_fun);
-       // println!("{:?},{:?}", cur, direction);
     }
     1000 * (cur.y + 1) + 4 * (cur.x + 1) + direction as i32
 }
@@ -351,7 +350,7 @@ fn do_move(
 ) -> (Point, Dir) {
     let mut next_pos = cur;
     let mut next_dir = direction;
-    for _ in 0..length + 1 {
+    for _ in 0..=length {
         cur = next_pos;
         direction = next_dir;
         let (new_dir, new_pos) = next_fun(cur, direction, board);
