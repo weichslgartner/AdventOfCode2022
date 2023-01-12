@@ -1,16 +1,10 @@
+use std::collections::hash_map::Entry::Vacant;
+use std::collections::{HashMap, HashSet};
 
-use std::collections::HashMap;
-use std::collections::HashSet;
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 struct Point {
     x: i32,
     y: i32,
-}
-
-impl Point {
-    fn new(x: i32, y: i32) -> Point {
-        Point { x, y }
-    }
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -65,13 +59,11 @@ fn do_turn(cur_dir: Dir, turn: &str) -> Dir {
 }
 
 fn add_to_min_max(min_max: &mut HashMap<i32, (i32, i32)>, entry: i32, index: i32) {
-    if !min_max.contains_key(&index) {
-        min_max.insert(index, (entry, entry));
-    } else {
-        let e = min_max[&index]; //[index][1] = entry
-        min_max.insert(index, (e.0, entry));
-
+    if let Vacant(e) = min_max.entry(index) {
+        e.insert((entry, entry));
+        return;
     }
+    min_max.insert(index, (min_max[&index].0, entry));
 }
 
 fn split_string(s: &str) -> Vec<String> {
@@ -87,7 +79,6 @@ fn split_string(s: &str) -> Vec<String> {
         }
     }
     result.push(current_token.clone());
-
     result
 }
 
@@ -162,162 +153,166 @@ fn get_next_wrap(p: Point, direction: Dir, board: &Board) -> (Dir, Point) {
 }
 
 fn get_next_cube(p: Point, direction: Dir, board: &Board) -> (Dir, Point) {
-    if direction == Dir::Right {
-        let x_new = p.x + 1;
-        if x_new > board.min_max_line[&p.y].1 {
-            if p.y < board.side_sz {
-                return (
-                    Dir::Left,
-                    Point {
-                        x: 2 * board.side_sz - 1,
-                        y: (3 * board.side_sz - 1) - p.y,
-                    },
-                );
-            } else if p.y < 2 * board.side_sz {
-                let direction = Dir::Up;
-                return (
-                    direction,
-                    Point {
-                        x: 2 * board.side_sz + (p.y - board.side_sz),
-                        y: board.side_sz - 1,
-                    },
-                );
-            } else if p.y < 3 * board.side_sz {
-                let direction = Dir::Left;
-                return (
-                    direction,
-                    Point {
-                        x: 3 * board.side_sz - 1,
-                        y: (3 * board.side_sz - 1) - p.y,
-                    },
-                );
-            } else if p.y < 4 * board.side_sz {
-                let direction = Dir::Up;
-                return (
-                    direction,
-                    Point {
-                        x: board.side_sz + p.y - (3 * board.side_sz),
-                        y: (3 * board.side_sz - 1),
-                    },
-                );
-            } else {
-                println!("error");
-            }
-        }
-        return (direction, Point { x: x_new, y: p.y });
+    match direction {
+        Dir::Right => cube_right(p, board, direction),
+        Dir::Down => cube_down(p, board, direction),
+        Dir::Left => cube_left(p, board, direction),
+        Dir::Up => cube_up(p, board, direction),
     }
-    if direction == Dir::Down {
-        let y_new = p.y + 1;
-        if y_new > board.min_max_row[&p.x].1 {
-            if p.x < board.side_sz {
-                return (
-                    Dir::Down,
-                    Point {
-                        x: 2 * board.side_sz + p.x,
-                        y: 0,
-                    },
-                );
-            } else if p.x < 2 * board.side_sz {
-                return (
-                    Dir::Left,
-                    Point {
-                        x: board.side_sz - 1,
-                        y: 3 * board.side_sz + p.x - board.side_sz,
-                    },
-                );
-            } else if p.x < 3 * board.side_sz {
-                return (
-                    Dir::Left,
-                    Point {
-                        x: 2 * board.side_sz - 1,
-                        y: board.side_sz + p.x - 2 * board.side_sz,
-                    },
-                );
-            } else {
-                println!("error");
-            }
-        }
-        return (direction, Point { x: p.x, y: y_new });
-    }
-    if direction == Dir::Left {
-        let x_new = p.x - 1;
-        if x_new < board.min_max_line[&p.y].0 {
-            if p.y < board.side_sz {
-                return (
-                    Dir::Right,
-                    Point {
-                        x: 0,
-                        y: (3 * board.side_sz - 1) - p.y,
-                    },
-                );
-            } else if p.y < 2 * board.side_sz {
-                let direction = Dir::Down;
-                return (
-                    direction,
-                    Point {
-                        x: p.y - board.side_sz,
-                        y: 2 * board.side_sz,
-                    },
-                );
-            } else if p.y < 3 * board.side_sz {
-                let direction = Dir::Right;
-                return (
-                    direction,
-                    Point {
-                        x: board.side_sz,
-                        y: (3 * board.side_sz - 1) - p.y,
-                    },
-                );
-            } else if p.y < 4 * board.side_sz {
-                let direction = Dir::Down;
-                return (
-                    direction,
-                    Point {
-                        x: board.side_sz + p.y - (3 * board.side_sz),
-                        y: 0,
-                    },
-                );
-            } else {
-                println!("error");
-            }
-        }
-        return (direction, Point { x: x_new, y: p.y });
-    }
-    if direction == Dir::Up {
-        let y_new = p.y - 1;
-        if y_new < board.min_max_row[&p.x].0 {
-            if p.x < board.side_sz {
-                return (
-                    Dir::Right,
-                    Point {
-                        x: board.side_sz,
-                        y: board.side_sz + p.x,
-                    },
-                );
-            } else if p.x < 2 * board.side_sz {
-                return (
-                    Dir::Right,
-                    Point {
-                        x: 0,
-                        y: 3 * board.side_sz + p.x - board.side_sz,
-                    },
-                );
-            } else if p.x < 3 * board.side_sz {
-                return (
-                    Dir::Up,
-                    Point {
-                        x: p.x - 2 * board.side_sz,
-                        y: 4 * board.side_sz - 1,
-                    },
-                );
-            } else {
-                println!("error");
-            }
-        }
-        return (direction, Point { x: p.x, y: y_new });
-    }
+}
 
-    unreachable!()
+fn cube_up(p: Point, board: &Board, direction: Dir) -> (Dir, Point) {
+    let y_new = p.y - 1;
+    if y_new < board.min_max_row[&p.x].0 {
+        if p.x < board.side_sz {
+            return (
+                Dir::Right,
+                Point {
+                    x: board.side_sz,
+                    y: board.side_sz + p.x,
+                },
+            );
+        } else if p.x < 2 * board.side_sz {
+            return (
+                Dir::Right,
+                Point {
+                    x: 0,
+                    y: 3 * board.side_sz + p.x - board.side_sz,
+                },
+            );
+        } else if p.x < 3 * board.side_sz {
+            return (
+                Dir::Up,
+                Point {
+                    x: p.x - 2 * board.side_sz,
+                    y: 4 * board.side_sz - 1,
+                },
+            );
+        }
+        unreachable!();
+    }
+    (direction, Point { x: p.x, y: y_new })
+}
+
+fn cube_left(p: Point, board: &Board, direction: Dir) -> (Dir, Point) {
+    let x_new = p.x - 1;
+    if x_new < board.min_max_line[&p.y].0 {
+        if p.y < board.side_sz {
+            return (
+                Dir::Right,
+                Point {
+                    x: 0,
+                    y: (3 * board.side_sz - 1) - p.y,
+                },
+            );
+        } else if p.y < 2 * board.side_sz {
+            let direction = Dir::Down;
+            return (
+                direction,
+                Point {
+                    x: p.y - board.side_sz,
+                    y: 2 * board.side_sz,
+                },
+            );
+        } else if p.y < 3 * board.side_sz {
+            let direction = Dir::Right;
+            return (
+                direction,
+                Point {
+                    x: board.side_sz,
+                    y: (3 * board.side_sz - 1) - p.y,
+                },
+            );
+        } else if p.y < 4 * board.side_sz {
+            let direction = Dir::Down;
+            return (
+                direction,
+                Point {
+                    x: board.side_sz + p.y - (3 * board.side_sz),
+                    y: 0,
+                },
+            );
+        }
+        unreachable!();
+    }
+    (direction, Point { x: x_new, y: p.y })
+}
+
+fn cube_down(p: Point, board: &Board, direction: Dir) -> (Dir, Point) {
+    let y_new = p.y + 1;
+    if y_new > board.min_max_row[&p.x].1 {
+        if p.x < board.side_sz {
+            return (
+                Dir::Down,
+                Point {
+                    x: 2 * board.side_sz + p.x,
+                    y: 0,
+                },
+            );
+        } else if p.x < 2 * board.side_sz {
+            return (
+                Dir::Left,
+                Point {
+                    x: board.side_sz - 1,
+                    y: 3 * board.side_sz + p.x - board.side_sz,
+                },
+            );
+        } else if p.x < 3 * board.side_sz {
+            return (
+                Dir::Left,
+                Point {
+                    x: 2 * board.side_sz - 1,
+                    y: board.side_sz + p.x - 2 * board.side_sz,
+                },
+            );
+        }
+        unreachable!();
+    }
+    (direction, Point { x: p.x, y: y_new })
+}
+
+fn cube_right(p: Point, board: &Board, direction: Dir) -> (Dir, Point) {
+    let x_new = p.x + 1;
+    if x_new > board.min_max_line[&p.y].1 {
+        if p.y < board.side_sz {
+            return (
+                Dir::Left,
+                Point {
+                    x: 2 * board.side_sz - 1,
+                    y: (3 * board.side_sz - 1) - p.y,
+                },
+            );
+        } else if p.y < 2 * board.side_sz {
+            let direction = Dir::Up;
+            return (
+                direction,
+                Point {
+                    x: 2 * board.side_sz + (p.y - board.side_sz),
+                    y: board.side_sz - 1,
+                },
+            );
+        } else if p.y < 3 * board.side_sz {
+            let direction = Dir::Left;
+            return (
+                direction,
+                Point {
+                    x: 3 * board.side_sz - 1,
+                    y: (3 * board.side_sz - 1) - p.y,
+                },
+            );
+        } else if p.y < 4 * board.side_sz {
+            let direction = Dir::Up;
+            return (
+                direction,
+                Point {
+                    x: board.side_sz + p.y - (3 * board.side_sz),
+                    y: (3 * board.side_sz - 1),
+                },
+            );
+        }
+        unreachable!()
+    }
+    (direction, Point { x: x_new, y: p.y })
 }
 
 fn solve(
@@ -371,82 +366,94 @@ fn part2(board: &Board, instructions: &Vec<String>) -> i32 {
     solve(board, instructions, &get_next_cube)
 }
 
-
-fn tests(board: &Board){
-    let (direction, p )= get_next_cube(Point::new(149, 0), Dir::Right, board)  ;
-    assert! (direction == Dir::Left && Point::new(99, 149) == p);
-    let (direction, p )= get_next_cube(Point::new(149, 49), Dir::Right, board);
-    assert! (direction == Dir::Left && Point::new(99, 100) == p);
-
-    let (direction, p )= get_next_cube(Point::new(99, 50), Dir::Right, board);
-    assert! (direction == Dir::Up && Point::new(100, 49) == p);
-    let (direction, p )= get_next_cube(Point::new(99, 99), Dir::Right, board);
-    assert! (direction == Dir::Up && Point::new(149, 49) == p);
-
-    let (direction, p )= get_next_cube(Point::new(99, 100), Dir::Right, board);
-    assert! (direction == Dir::Left && Point::new(149, 49) == p);
-    let (direction, p )= get_next_cube(Point::new(99, 149), Dir::Right, board);
-    assert! (direction == Dir::Left && Point::new(149, 0) == p);
-
-    let (direction, p )= get_next_cube(Point::new(49, 150), Dir::Right, board);
-    assert! (direction == Dir::Up && Point::new(50, 149) == p);
-    let (direction, p )= get_next_cube(Point::new(49, 199), Dir::Right, board);
-    assert! (direction == Dir::Up && Point::new(99, 149) == p);
-
-    let (direction, p )= get_next_cube(Point::new(50, 0), Dir::Left, board);
-    assert! (direction == Dir::Right && Point::new(0, 149) == p);
-    let (direction, p )= get_next_cube(Point::new(50, 49), Dir::Left, board);
-    assert! (direction == Dir::Right && Point::new(0, 100) == p);
-
-    let (direction, p )= get_next_cube(Point::new(50, 50), Dir::Left, board);
-    assert! (direction == Dir::Down && Point::new(0, 100) == p);
-    let (direction, p )= get_next_cube(Point::new(50, 99), Dir::Left, board);
-    assert! (direction == Dir::Down && Point::new(49, 100) == p);
-
-    let (direction, p )= get_next_cube(Point::new(0, 100), Dir::Left, board);
-    assert! (direction == Dir::Right && Point::new(50, 49) == p);
-    let (direction, p )= get_next_cube(Point::new(0, 149), Dir::Left, board);
-    assert! (direction == Dir::Right && Point::new(50, 0) == p);
-
-    let (direction, p )= get_next_cube(Point::new(0, 150), Dir::Left, board);
-    assert! (direction == Dir::Down && Point::new(50, 0) == p);
-    let (direction, p )= get_next_cube(Point::new(0, 199), Dir::Left, board);
-    assert! (direction == Dir::Down && Point::new(99, 0) == p);
-
-    let (direction, p )= get_next_cube(Point::new(0, 100), Dir::Up, board);
-    assert! (direction == Dir::Right && Point::new(50, 50) == p);
-    let (direction, p )= get_next_cube(Point::new(49, 100), Dir::Up, board);
-    assert! (direction == Dir::Right && Point::new(50, 99) == p);
-
-    let (direction, p )= get_next_cube(Point::new(50, 0), Dir::Up, board);
-    assert! (direction == Dir::Right && Point::new(0, 150) == p);
-    let (direction, p )= get_next_cube(Point::new(99, 0), Dir::Up, board);
-    assert! (direction == Dir::Right && Point::new(0, 199) == p);
-
-    let (direction, p )= get_next_cube(Point::new(100, 0), Dir::Up, board);
-    assert! (direction == Dir::Up && Point::new(0, 199) == p);
-    let (direction, p )= get_next_cube(Point::new(149, 0), Dir::Up, board);
-    assert! (direction == Dir::Up && Point::new(49, 199) == p);
-
-    let (direction, p )= get_next_cube(Point::new(0, 199), Dir::Down, board);
-    assert! (direction == Dir::Down && Point::new(100, 0) == p);
-    let (direction, p )= get_next_cube(Point::new(49, 199), Dir::Down, board);
-    assert! (direction == Dir::Down && Point::new(149, 0) == p);
-
-    let (direction, p )= get_next_cube(Point::new(50, 149), Dir::Down, board);
-    assert! (direction == Dir::Left && Point::new(49, 150) == p);
-    let (direction, p )= get_next_cube(Point::new(99, 149), Dir::Down, board);
-    assert! (direction == Dir::Left && Point::new(49, 199) == p);
-
-    let (direction, p )= get_next_cube(Point::new(100, 49), Dir::Down, board);
-    assert! (direction == Dir::Left && Point::new(99, 50) == p);
-    let (direction, p )= get_next_cube(Point::new(149, 49), Dir::Down, board);
-    assert! (direction == Dir::Left && Point::new(99, 99) == p);
-}
 fn main() {
     let input = include_str!("../../../inputs/input_22.txt");
     let (board, instructions) = parse_input(input);
-    tests(&board);
     println!("Part 1: {}", part1(&board, &instructions));
     println!("Part 2: {}", part2(&board, &instructions));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    impl Point {
+        fn new(x: i32, y: i32) -> Point {
+            Point { x, y }
+        }
+    }
+
+    #[test]
+    fn tests() {
+        let input = include_str!("../../../inputs/input_22.txt");
+        let (board, _) = parse_input(input);
+        let (direction, p) = get_next_cube(Point::new(149, 0), Dir::Right, &board);
+        assert!(direction == Dir::Left && Point::new(99, 149) == p);
+        let (direction, p) = get_next_cube(Point::new(149, 49), Dir::Right, &board);
+        assert!(direction == Dir::Left && Point::new(99, 100) == p);
+
+        let (direction, p) = get_next_cube(Point::new(99, 50), Dir::Right, &board);
+        assert!(direction == Dir::Up && Point::new(100, 49) == p);
+        let (direction, p) = get_next_cube(Point::new(99, 99), Dir::Right, &board);
+        assert!(direction == Dir::Up && Point::new(149, 49) == p);
+
+        let (direction, p) = get_next_cube(Point::new(99, 100), Dir::Right, &board);
+        assert!(direction == Dir::Left && Point::new(149, 49) == p);
+        let (direction, p) = get_next_cube(Point::new(99, 149), Dir::Right, &board);
+        assert!(direction == Dir::Left && Point::new(149, 0) == p);
+
+        let (direction, p) = get_next_cube(Point::new(49, 150), Dir::Right, &board);
+        assert!(direction == Dir::Up && Point::new(50, 149) == p);
+        let (direction, p) = get_next_cube(Point::new(49, 199), Dir::Right, &board);
+        assert!(direction == Dir::Up && Point::new(99, 149) == p);
+
+        let (direction, p) = get_next_cube(Point::new(50, 0), Dir::Left, &board);
+        assert!(direction == Dir::Right && Point::new(0, 149) == p);
+        let (direction, p) = get_next_cube(Point::new(50, 49), Dir::Left, &board);
+        assert!(direction == Dir::Right && Point::new(0, 100) == p);
+
+        let (direction, p) = get_next_cube(Point::new(50, 50), Dir::Left, &board);
+        assert!(direction == Dir::Down && Point::new(0, 100) == p);
+        let (direction, p) = get_next_cube(Point::new(50, 99), Dir::Left, &board);
+        assert!(direction == Dir::Down && Point::new(49, 100) == p);
+
+        let (direction, p) = get_next_cube(Point::new(0, 100), Dir::Left, &board);
+        assert!(direction == Dir::Right && Point::new(50, 49) == p);
+        let (direction, p) = get_next_cube(Point::new(0, 149), Dir::Left, &board);
+        assert!(direction == Dir::Right && Point::new(50, 0) == p);
+
+        let (direction, p) = get_next_cube(Point::new(0, 150), Dir::Left, &board);
+        assert!(direction == Dir::Down && Point::new(50, 0) == p);
+        let (direction, p) = get_next_cube(Point::new(0, 199), Dir::Left, &board);
+        assert!(direction == Dir::Down && Point::new(99, 0) == p);
+
+        let (direction, p) = get_next_cube(Point::new(0, 100), Dir::Up, &board);
+        assert!(direction == Dir::Right && Point::new(50, 50) == p);
+        let (direction, p) = get_next_cube(Point::new(49, 100), Dir::Up, &board);
+        assert!(direction == Dir::Right && Point::new(50, 99) == p);
+
+        let (direction, p) = get_next_cube(Point::new(50, 0), Dir::Up, &board);
+        assert!(direction == Dir::Right && Point::new(0, 150) == p);
+        let (direction, p) = get_next_cube(Point::new(99, 0), Dir::Up, &board);
+        assert!(direction == Dir::Right && Point::new(0, 199) == p);
+
+        let (direction, p) = get_next_cube(Point::new(100, 0), Dir::Up, &board);
+        assert!(direction == Dir::Up && Point::new(0, 199) == p);
+        let (direction, p) = get_next_cube(Point::new(149, 0), Dir::Up, &board);
+        assert!(direction == Dir::Up && Point::new(49, 199) == p);
+
+        let (direction, p) = get_next_cube(Point::new(0, 199), Dir::Down, &board);
+        assert!(direction == Dir::Down && Point::new(100, 0) == p);
+        let (direction, p) = get_next_cube(Point::new(49, 199), Dir::Down, &board);
+        assert!(direction == Dir::Down && Point::new(149, 0) == p);
+
+        let (direction, p) = get_next_cube(Point::new(50, 149), Dir::Down, &board);
+        assert!(direction == Dir::Left && Point::new(49, 150) == p);
+        let (direction, p) = get_next_cube(Point::new(99, 149), Dir::Down, &board);
+        assert!(direction == Dir::Left && Point::new(49, 199) == p);
+
+        let (direction, p) = get_next_cube(Point::new(100, 49), Dir::Down, &board);
+        assert!(direction == Dir::Left && Point::new(99, 50) == p);
+        let (direction, p) = get_next_cube(Point::new(149, 49), Dir::Down, &board);
+        assert!(direction == Dir::Left && Point::new(99, 99) == p);
+    }
 }
