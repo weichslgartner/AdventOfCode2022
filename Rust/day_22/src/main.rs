@@ -1,5 +1,6 @@
 use std::collections::hash_map::Entry::Vacant;
 use std::collections::{HashMap, HashSet};
+type NextFn = fn(Point, Dir, &Board) -> (Dir, Point);
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 struct Point {
@@ -121,35 +122,36 @@ fn parse_input(lines: &str) -> (Board, Vec<String>) {
 }
 
 fn get_next_wrap(p: Point, direction: Dir, board: &Board) -> (Dir, Point) {
-    if direction == Dir::Right {
-        let mut x_new = p.x + 1;
-        if x_new > board.min_max_line[&p.y].1 {
-            x_new = board.min_max_line[&p.y].0;
+    match direction {
+        Dir::Right => {
+            let mut x_new = p.x + 1;
+            if x_new > board.min_max_line[&p.y].1 {
+                x_new = board.min_max_line[&p.y].0;
+            }
+            (direction, Point { x: x_new, y: p.y })
         }
-        return (direction, Point { x: x_new, y: p.y });
-    }
-    if direction == Dir::Down {
-        let mut y_new = p.y + 1;
-        if y_new > board.min_max_row[&p.x].1 {
-            y_new = board.min_max_row[&p.x].0;
+        Dir::Down => {
+            let mut y_new = p.y + 1;
+            if y_new > board.min_max_row[&p.x].1 {
+                y_new = board.min_max_row[&p.x].0;
+            }
+            (direction, Point { x: p.x, y: y_new })
         }
-        return (direction, Point { x: p.x, y: y_new });
-    }
-    if direction == Dir::Left {
-        let mut x_new = p.x - 1;
-        if x_new < board.min_max_line[&p.y].0 {
-            x_new = board.min_max_line[&p.y].1;
+        Dir::Left => {
+            let mut x_new = p.x - 1;
+            if x_new < board.min_max_line[&p.y].0 {
+                x_new = board.min_max_line[&p.y].1;
+            }
+            (direction, Point { x: x_new, y: p.y })
         }
-        return (direction, Point { x: x_new, y: p.y });
-    }
-    if direction == Dir::Up {
-        let mut y_new = p.y - 1;
-        if y_new < board.min_max_row[&p.x].0 {
-            y_new = board.min_max_row[&p.x].1;
+        Dir::Up => {
+            let mut y_new = p.y - 1;
+            if y_new < board.min_max_row[&p.x].0 {
+                y_new = board.min_max_row[&p.x].1;
+            }
+            (direction, Point { x: p.x, y: y_new })
         }
-        return (direction, Point { x: p.x, y: y_new });
     }
-    unreachable!()
 }
 
 fn get_next_cube(p: Point, direction: Dir, board: &Board) -> (Dir, Point) {
@@ -206,27 +208,24 @@ fn cube_left(p: Point, board: &Board, direction: Dir) -> (Dir, Point) {
                 },
             );
         } else if p.y < 2 * board.side_sz {
-            let direction = Dir::Down;
             return (
-                direction,
+                Dir::Down,
                 Point {
                     x: p.y - board.side_sz,
                     y: 2 * board.side_sz,
                 },
             );
         } else if p.y < 3 * board.side_sz {
-            let direction = Dir::Right;
             return (
-                direction,
+                Dir::Right,
                 Point {
                     x: board.side_sz,
                     y: (3 * board.side_sz - 1) - p.y,
                 },
             );
         } else if p.y < 4 * board.side_sz {
-            let direction = Dir::Down;
             return (
-                direction,
+                Dir::Down,
                 Point {
                     x: board.side_sz + p.y - (3 * board.side_sz),
                     y: 0,
@@ -283,27 +282,24 @@ fn cube_right(p: Point, board: &Board, direction: Dir) -> (Dir, Point) {
                 },
             );
         } else if p.y < 2 * board.side_sz {
-            let direction = Dir::Up;
             return (
-                direction,
+                Dir::Up,
                 Point {
                     x: 2 * board.side_sz + (p.y - board.side_sz),
                     y: board.side_sz - 1,
                 },
             );
         } else if p.y < 3 * board.side_sz {
-            let direction = Dir::Left;
             return (
-                direction,
+                Dir::Left,
                 Point {
                     x: 3 * board.side_sz - 1,
                     y: (3 * board.side_sz - 1) - p.y,
                 },
             );
         } else if p.y < 4 * board.side_sz {
-            let direction = Dir::Up;
             return (
-                direction,
+                Dir::Up,
                 Point {
                     x: board.side_sz + p.y - (3 * board.side_sz),
                     y: (3 * board.side_sz - 1),
@@ -315,11 +311,7 @@ fn cube_right(p: Point, board: &Board, direction: Dir) -> (Dir, Point) {
     (direction, Point { x: x_new, y: p.y })
 }
 
-fn solve(
-    board: &Board,
-    instructions: &Vec<String>,
-    next_fun: &dyn Fn(Point, Dir, &Board) -> (Dir, Point),
-) -> i32 {
+fn solve(board: &Board, instructions: &Vec<String>, next_fun: NextFn) -> i32 {
     let mut cur = Point {
         y: 0,
         x: board.min_max_line[&0].0,
@@ -341,7 +333,7 @@ fn do_move(
     mut direction: Dir,
     length: i32,
     board: &Board,
-    next_fun: &dyn Fn(Point, Dir, &Board) -> (Dir, Point),
+    next_fun: NextFn,
 ) -> (Point, Dir) {
     let mut next_pos = cur;
     let mut next_dir = direction;
@@ -359,11 +351,11 @@ fn do_move(
 }
 
 fn part1(board: &Board, instructions: &Vec<String>) -> i32 {
-    solve(board, instructions, &get_next_wrap)
+    solve(board, instructions, get_next_wrap)
 }
 
 fn part2(board: &Board, instructions: &Vec<String>) -> i32 {
-    solve(board, instructions, &get_next_cube)
+    solve(board, instructions, get_next_cube)
 }
 
 fn main() {
