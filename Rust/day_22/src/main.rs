@@ -340,9 +340,7 @@ fn do_move(
     for _ in 0..=length {
         cur = next_pos;
         direction = next_dir;
-        let (new_dir, new_pos) = next_fun(cur, direction, board);
-        next_dir = new_dir;
-        next_pos = new_pos;
+        (next_dir, next_pos) = next_fun(cur, direction, board);
         if board.walls.contains(&next_pos) {
             break;
         }

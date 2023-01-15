@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
 const WIDTH: usize = 7;
@@ -14,16 +15,13 @@ impl Point {
     }
 }
 
-fn most_common_element(numbers: &[usize]) -> usize {
-    let frequency_map = numbers.iter().fold(HashMap::new(), |mut acc, x| {
-        *acc.entry(*x).or_insert(0) += 1;
-        acc
-    });
-    *frequency_map
+fn most_common_element(numbers: &[usize]) -> Option<usize> {
+    numbers
         .iter()
+        .counts()
+        .into_iter()
         .max_by(|(_, a), (_, b)| a.cmp(b))
-        .unwrap()
-        .0
+        .map(|(k,_)| *k)
 }
 
 fn generate_shapes() -> [Vec<Point>; 5] {
@@ -116,7 +114,7 @@ fn solve(line: &str, rounds: usize) -> usize {
                     periods.push(period);
                     let cycles = to_go / period;
                     if to_go % period == 0
-                        && period == most_common_element(&periods)
+                        && period == most_common_element(&periods).unwrap()
                         && periods.len() > 300
                     {
                         return ground.iter().max().unwrap()
